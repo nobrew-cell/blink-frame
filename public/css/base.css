@@ -1,0 +1,45 @@
+/* BlinkFrame — tokens, fontes (offline) e marca. Compartilhado pela vitrine e pelo editor. */
+@font-face { font-family: "Bricolage Grotesque"; font-weight: 400; font-display: swap; src: url(/vendor/fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Bricolage Grotesque"; font-weight: 700; font-display: swap; src: url(/vendor/fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url(/vendor/fontsource/inter/files/inter-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url(/vendor/fontsource/inter/files/inter-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url(/vendor/fontsource/inter/files/inter-latin-600-normal.woff2) format("woff2"); }
+
+:root {
+    --ink: #1c1e21;
+    --ink-2: #26292e;
+    --ink-3: #32363d;
+    --paper: #ebebeb;
+    --paper-2: #f6f5f1;
+    --blue: #284f92;
+    --blue-soft: #7fa2e6;
+    --amber: #ffc233;
+    --danger: #e5484d;
+    --line-dark: rgba(255, 255, 255, 0.1);
+    --line-light: rgba(28, 30, 33, 0.14);
+    --display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; }
+body { font-family: var(--body); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+
+/* Marca: o logo (olho) fica sobre o "ladrilho" cinza original para ter contraste em fundo escuro */
+.brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+.brand-mark { width: 44px; height: 44px; border-radius: 12px; background: var(--paper); display: grid; place-items: center; flex: none; overflow: hidden; }
+.brand-mark img, .brand-mark svg { width: 34px; height: 34px; object-fit: contain; display: block; }
+/* Olho interativo (js/brand.js): só a íris se move; volta ao centro suavemente */
+.eye-iris { transition: transform 340ms cubic-bezier(0.22, 0.9, 0.3, 1); will-change: transform; }
+.eye-iris > use { transition: fill 300ms ease; }
+.eye-iris > path { transition: stroke 300ms ease; }
+.brand-name { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

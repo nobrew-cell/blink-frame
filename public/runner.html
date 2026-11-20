@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>BlinkFrame — runner</title>
+<!--
+  Página "runner": renderiza UM template no palco (#stage), em pixels reais (1920x1080, 1080x1920 ou 1080x1080).
+  É usada pelo preview do editor (iframe), pelos previews da vitrine e pelo exportador headless (Playwright).
+  Fundo TRANSPARENTE por padrão (necessário para o canal alfa). ?bg=... só aplica um fundo de PREVIEW.
+-->
+<style>
+    html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
+    #stage { position: relative; transform-origin: 0 0; color: #fff; }
+    /* Fundos apenas de visualização (no export não existe ?bg) */
+    body[data-bg="checker"] {
+        background-color: #2a2c31;
+        background-image: conic-gradient(#3a3d44 25%, transparent 0 50%, #3a3d44 0 75%, transparent 0);
+        background-size: 48px 48px;
+    }
+    body[data-bg="scene"] {
+        background:
+            radial-gradient(ellipse at 20% 15%, rgba(255, 214, 170, .55), transparent 55%),
+            radial-gradient(ellipse at 85% 80%, rgba(60, 90, 160, .65), transparent 60%),
+            linear-gradient(160deg, #2a3350, #4b4560 45%, #8a6a62);
+    }
+    body[data-bg="dark"] { background: #101114; }
+    body[data-bg="light"] { background: #f1efe9; }
+    body[data-bg="green"] { background: #00ff00; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script type="module" src="/engine/runner.js"></script>
+</body>
+</html>

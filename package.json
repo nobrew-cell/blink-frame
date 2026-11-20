@@ -1,0 +1,28 @@
+{
+  "name": "blinkframe",
+  "version": "1.0.0",
+  "description": "BlinkFrame — editor local e offline-first de motion graphics (lower thirds) com exportação .mov (alfa) e .mp4 (chroma key).",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "check": "node scripts/check-env.js",
+    "browser": "playwright install chromium",
+    "sounds": "node scripts/make-sounds.js",
+    "test:render": "node scripts/smoke-test.js"
+  },
+  "dependencies": {
+    "@fontsource/bebas-neue": "^5.1.0",
+    "@fontsource/bricolage-grotesque": "^5.1.0",
+    "@fontsource/inter": "^5.1.0",
+    "@fontsource/montserrat": "^5.1.0",
+    "@fontsource/oswald": "^5.1.0",
+    "@fontsource/playfair-display": "^5.1.0",
+    "@fontsource/poppins": "^5.1.0",
+    "@fontsource/roboto-mono": "^5.1.0",
+    "express": "^4.21.2",
+    "playwright": "^1.49.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "destaque-noticia",
+  "name": "Destaque / Notícia",
+  "description": "Estilo telejornal: selo \"AO VIVO\" pulsante, manchete em até duas linhas e linha de apoio digitada.",
+  "category": "lower-third",
+  "tags": ["notícia", "jornal", "manchete", "ao vivo"],
+  "order": 3
+}

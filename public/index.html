@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BlinkFrame — lower thirds num piscar de olhos</title>
+<meta name="description" content="Editor local e offline de lower thirds: edite, visualize e exporte .mov com alfa e .mp4 chroma key.">
+<link rel="icon" type="image/svg+xml" href="/brand/favicon.svg">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/home.css">
+</head>
+<body class="home">
+<div class="wrap">
+    <header class="top">
+        <a class="brand" href="/" aria-label="BlinkFrame — início">
+            <span class="brand-mark"><img id="brand-logo" src="/brand/logo-normal.svg" alt=""></span>
+            <span class="brand-name">BlinkFrame</span>
+        </a>
+        <span class="status" id="status" data-state="unknown"><i></i><span>Verificando o FFmpeg…</span></span>
+    </header>
+
+    <section class="hero">
+        <div>
+            <h1>
+                <span class="q">Precisa de uma lower?</span>
+                <span class="a">Tenha ela num piscar de olhos —</span>
+                <span class="b">um piscar para entrar e outro para sair.</span>
+            </h1>
+            <div class="hero-cta">
+                <span class="pill">100% local e offline</span>
+                <span class="pill">Sem cota, sem marca d'água</span>
+                <span class="pill">.mov com alfa + .mp4 chroma</span>
+            </div>
+        </div>
+    </section>
+
+    <section aria-labelledby="modelos">
+        <div class="section-head">
+            <h2 id="modelos">Modelos</h2>
+            <span id="count"></span>
+        </div>
+        <div class="grid" id="grid" aria-live="polite"></div>
+    </section>
+
+    <footer>BlinkFrame · tudo roda na sua máquina. Novo modelo? Crie uma pasta em <code>/templates</code>.</footer>
+</div>
+<script src="/js/brand.js" type="module"></script>
+<script src="/js/home.js" type="module"></script>
+</body>
+</html>

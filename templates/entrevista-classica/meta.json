@@ -1,0 +1,8 @@
+{
+  "id": "entrevista-classica",
+  "name": "Entrevista Clássica",
+  "description": "Placa sólida com barra de destaque, nome, cargo e empresa. Revelação em máscara e logo opcional.",
+  "category": "lower-third",
+  "tags": ["entrevista", "nome", "cargo", "logo"],
+  "order": 1
+}

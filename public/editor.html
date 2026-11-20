@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor — BlinkFrame</title>
+<link rel="icon" type="image/svg+xml" href="/brand/favicon.svg">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/editor.css">
+</head>
+<body class="editor">
+<header class="bar">
+    <a class="back" href="/" title="Voltar para a vitrine">← Vitrine</a>
+    <a class="brand" href="/" aria-label="BlinkFrame">
+        <span class="brand-mark"><img id="brand-logo" src="/brand/logo-normal.svg" alt=""></span>
+        <span class="brand-name">BlinkFrame</span>
+    </a>
+    <span class="divider"></span>
+    <h1 id="tpl-name">Carregando…</h1>
+    <div class="bg-picker" role="group" aria-label="Fundo da prévia">
+        <span>Fundo</span>
+        <button data-bg="checker" aria-pressed="true" title="Xadrez (transparência)">Xadrez</button>
+        <button data-bg="scene" aria-pressed="false" title="Cena de exemplo">Cena</button>
+        <button data-bg="dark" aria-pressed="false">Escuro</button>
+        <button data-bg="light" aria-pressed="false">Claro</button>
+        <button data-bg="green" aria-pressed="false" title="Como ficará o .mp4 verde">Verde</button>
+    </div>
+</header>
+
+<main class="layout">
+    <aside class="panel">
+        <div class="panel-scroll">
+            <section>
+                <h2>Formato</h2>
+                <div class="segmented" id="sizes" role="group" aria-label="Formato do vídeo"></div>
+            </section>
+            <div id="controls"></div>
+            <button class="ghost" id="reset" type="button">Restaurar padrão</button>
+        </div>
+
+        <section class="export" aria-labelledby="export-title">
+            <h2 id="export-title">Exportar</h2>
+            <div class="export-grid">
+                <label class="check"><input type="checkbox" id="fmt-mov" checked> <span><b>.mov</b> com alfa</span></label>
+                <label class="check"><input type="checkbox" id="fmt-mp4" checked> <span><b>.mp4</b> fundo verde</span></label>
+                <label class="field-inline">FPS
+                    <select id="fps"><option>24</option><option>25</option><option selected>30</option><option>50</option><option>60</option></select>
+                </label>
+                <label class="field-inline">Codec do .mov
+                    <select id="mov-codec"><option value="prores">ProRes 4444</option><option value="png">PNG (sem perdas)</option></select>
+                </label>
+            </div>
+            <label class="check" id="sounds-row"><input type="checkbox" id="sounds"> <span>Incluir sons do template</span></label>
+            <button class="primary" id="export" type="button">Exportar vídeo</button>
+            <div class="job" id="job" hidden>
+                <div class="job-top"><span id="job-msg">Na fila</span><button class="link" id="job-cancel" type="button">Cancelar</button></div>
+                <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="meter"><i id="meter-fill"></i></div>
+                <div class="job-sub" id="job-sub"></div>
+                <div class="downloads" id="downloads"></div>
+                <pre class="job-error" id="job-error" hidden></pre>
+            </div>
+        </section>
+    </aside>
+
+    <section class="stage-area">
+        <div class="stage-box" id="stage-box">
+            <div class="stage-frame" id="stage-frame">
+                <iframe id="preview" title="Prévia da animação"></iframe>
+            </div>
+            <p class="stage-error" id="stage-error" hidden></p>
+        </div>
+        <div class="transport">
+            <button id="play" class="icon" type="button" aria-label="Reproduzir ou pausar (Espaço)">❚❚</button>
+            <button id="prev" class="icon" type="button" aria-label="Quadro anterior (←)">⏮</button>
+            <button id="next" class="icon" type="button" aria-label="Próximo quadro (→)">⏭</button>
+            <span class="time" id="time">0:00.00</span>
+            <input type="range" id="scrubber" min="0" max="1" step="0.001" value="0" aria-label="Linha do tempo">
+            <span class="time dim" id="duration">0:00.00</span>
+            <span class="frame" id="frame">quadro 0</span>
+        </div>
+    </section>
+</main>
+<script src="/js/brand.js" type="module"></script>
+<script src="/js/editor.js" type="module"></script>
+</body>
+</html>

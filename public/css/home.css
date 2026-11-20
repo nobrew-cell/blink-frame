@@ -1,0 +1,46 @@
+/* Vitrine */
+body.home { background: var(--paper); color: var(--ink); }
+.wrap { width: min(1200px, calc(100% - 48px)); margin: 0 auto; }
+
+.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+.status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 999px; background: var(--paper-2); border: 1px solid var(--line-light); }
+.status i { width: 8px; height: 8px; border-radius: 50%; background: #9aa0a6; display: block; }
+.status[data-state="ok"] i { background: #2f9e44; }
+.status[data-state="bad"] i { background: var(--danger); }
+
+.hero { max-width: 880px; padding: 56px 0 72px; }
+.hero h1 { margin: 0; font-family: var(--display); font-weight: 700; letter-spacing: -0.035em; line-height: 1.02; }
+.hero h1 .q { display: block; font-size: clamp(40px, 6.2vw, 80px); }
+.hero h1 .a { display: block; font-size: clamp(28px, 3.9vw, 50px); color: var(--blue); margin-top: 14px; }
+.hero h1 .b { display: block; font-size: clamp(20px, 2.3vw, 30px); font-weight: 400; margin-top: 12px; color: rgba(28, 30, 33, 0.75); letter-spacing: -0.015em; }
+.hero-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 34px; }
+.pill { font-size: 13.5px; font-weight: 500; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-light); background: var(--paper-2); }
+
+.section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+.section-head h2 { margin: 0; font-family: var(--display); font-size: 28px; letter-spacing: -0.02em; }
+.section-head span { color: rgba(28, 30, 33, 0.6); font-size: 14px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; padding-bottom: 72px; }
+.card { background: var(--paper-2); border: 1px solid var(--line-light); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: transform .2s ease, box-shadow .2s ease; }
+.card:hover, .card:focus-within { transform: translateY(-3px); box-shadow: 0 18px 40px -18px rgba(28, 30, 33, 0.45); }
+.preview { position: relative; aspect-ratio: 16 / 9; background: #20232a; overflow: hidden; display: block; }
+.preview iframe { position: absolute; top: 0; left: 0; width: 1920px; height: 1080px; border: 0; transform-origin: 0 0; pointer-events: none; background: transparent; opacity: 0; transition: opacity .3s; }
+.preview.ready iframe { opacity: 1; }
+.preview .badge { position: absolute; right: 10px; top: 10px; font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: rgba(0, 0, 0, 0.55); color: #fff; backdrop-filter: blur(6px); }
+.preview .hint { position: absolute; left: 10px; top: 10px; font-size: 12px; font-weight: 500; padding: 4px 9px; border-radius: 999px; background: rgba(255, 255, 255, 0.85); color: var(--ink); opacity: 0; transition: opacity .2s; }
+.card:hover .hint, .card:focus-within .hint { opacity: 1; }
+.card-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.card h3 { margin: 0; font-family: var(--display); font-size: 21px; letter-spacing: -0.02em; }
+.card p { margin: 0; color: rgba(28, 30, 33, 0.72); font-size: 14px; flex: 1; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags span { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line-light); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 14.5px; border: 0; border-radius: 12px; padding: 12px 18px; background: var(--ink); color: var(--paper); transition: background .15s; margin-top: 4px; }
+.btn:hover { background: var(--blue); }
+
+.card.add { border-style: dashed; background: transparent; justify-content: center; align-items: center; text-align: center; padding: 32px; min-height: 280px; gap: 10px; box-shadow: none; transform: none; }
+.card.add code { background: var(--paper-2); padding: 2px 8px; border-radius: 6px; font-size: 13px; }
+.card.add p { flex: none; }
+
+footer { border-top: 1px solid var(--line-light); padding: 22px 0 40px; font-size: 13.5px; color: rgba(28, 30, 33, 0.65); }
+
+@media (max-width: 860px) { .hero { padding-top: 28px; } }
