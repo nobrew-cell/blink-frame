@@ -15,7 +15,6 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = path.join(ROOT, 'public');
 const TEMPLATES = path.join(ROOT, 'templates');
 const OUTPUT = path.join(ROOT, 'output');
-const FONTS = path.join(ROOT, 'node_modules', '@fontsource');
 const SIZES = ['landscape', 'vertical', 'square'];
 
 /** Remove saídas com mais de 24 h. */
@@ -36,8 +35,9 @@ export async function startServer({ port = 3000, host = '127.0.0.1' } = {}) {
     app.use(express.json({ limit: '16mb' })); // logos em data URL
 
     // Estáticos
-    app.use('/vendor/fontsource', express.static(FONTS, { maxAge: '7d' }));
     app.use('/templates', express.static(TEMPLATES, { etag: false, setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache') }));
+    // Fontes empacotadas (public/fonts) quase nunca mudam: cache longo. O restante do /public sempre revalida.
+    app.use('/fonts', express.static(path.join(PUBLIC, 'fonts'), { maxAge: '7d' }));
     app.use(express.static(PUBLIC, { setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache') }));
 
     // API

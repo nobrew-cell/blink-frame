@@ -5,14 +5,14 @@
  * Linha do tempo (s):  0.00 fio desenha · 0.10–0.9 letras do nome · 0.60 subtítulo
  *                      3.90 saída (fade + deriva) · 4.5 fim
  */
-import { el, set, letters, controls, opacityControls, logoField, prog, ease, fit } from '../../engine/kit.js';
+import { el, set, letters, field, controls, logoControls, opacityControls, prog, ease, fit } from '../../engine/kit.js';
 import { anchor, layoutWidth } from '../../engine/parts.js';
 
 const fields = [
-    { key: 'name', type: 'text', label: 'Texto principal (nome)', default: 'Carlos Almeida', maxLength: 40 },
-    { key: 'title', type: 'text', label: 'Subtítulo (cargo)', default: 'Jornalista e documentarista', maxLength: 60 },
-    logoField('Logo (opcional)'),
-    { key: 'shadow', type: 'toggle', label: 'Sombra suave (legibilidade)', default: true },
+    field.text('name', 'Texto principal (nome)', 'Carlos Almeida', { maxLength: 40 }),
+    field.text('title', 'Subtítulo (cargo)', 'Jornalista e documentarista', { maxLength: 60 }),
+    ...logoControls({ side: 'left' }),
+    field.toggle('shadow', 'Sombra suave (legibilidade)', true),
     ...controls({ accent: '#ffb703', text: '#ffffff', font: 'bricolage', position: 'left' }),
     ...opacityControls([['name', 'Nome'], ['rule', 'Fio de destaque'], ['title', 'Cargo'], ['logo', 'Logo']]),
 ];
@@ -27,11 +27,11 @@ function setup(root, ctx) {
     const shadow = values.shadow ? '0 2px 22px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.45)' : 'none';
 
     const box = anchor(root, ctx);
-    const wrap = el('div', { display: 'flex', alignItems: 'flex-end', gap: '24px', flexDirection: position === 'right' ? 'row-reverse' : 'row' }, box);
+    const wrap = el('div', { display: 'flex', alignItems: 'flex-end', gap: '24px' }, box);
 
     let logoEl = null;
     if (values.logo) {
-        logoEl = ctx.layer('logo', el('div', { width: '88px', height: '88px', flex: 'none', marginBottom: '6px' }, wrap));
+        logoEl = ctx.layer('logo', el('div', { width: '88px', height: '88px', flex: 'none', marginBottom: '6px', order: values.logoSide === 'right' ? 1 : -1 }, wrap));
         const img = document.createElement('img');
         img.src = values.logo;
         set(img, { width: '100%', height: '100%', objectFit: 'contain', display: 'block' });

@@ -1,0 +1,8 @@
+{
+  "id": "entrevista-microfone",
+  "name": "Entrevista com Ícone",
+  "description": "Bloco escuro discreto com selo superior (ENTREVISTA, PODCAST…), barras de áudio animadas, nome, fio de destaque e subtítulo. Ícone circular substituível, à esquerda ou à direita.",
+  "category": "lower-third",
+  "tags": ["entrevista", "podcast", "ícone", "microfone"],
+  "order": 4
+}

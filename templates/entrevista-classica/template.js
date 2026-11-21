@@ -5,14 +5,14 @@
  * Linha do tempo (s):  0.00 barra cresce · 0.15 placa abre (wipe) · 0.30–0.65 textos sobem na máscara
  *                      0.70 logo entra · 5.00 textos saem · 5.20 placa fecha · 5.55 barra some
  */
-import { el, set, fit, controls, opacityControls, logoField, inOut, prog, ease } from '../../engine/kit.js';
+import { el, set, fit, field, controls, logoControls, opacityControls, inOut, prog, ease } from '../../engine/kit.js';
 import { anchor, backdrop, layoutWidth, maskLine, wipe } from '../../engine/parts.js';
 
 const fields = [
-    { key: 'name', type: 'text', label: 'Texto principal (nome)', default: 'Maria Souza', maxLength: 40 },
-    { key: 'title', type: 'text', label: 'Subtítulo (cargo)', default: 'Diretora de Criação', maxLength: 60 },
-    { key: 'company', type: 'text', label: 'Empresa / local', default: 'Estúdio Aurora', maxLength: 48, allowEmpty: true },
-    logoField('Logo (opcional)'),
+    field.text('name', 'Texto principal (nome)', 'Maria Souza', { maxLength: 40 }),
+    field.text('title', 'Subtítulo (cargo)', 'Diretora de Criação', { maxLength: 60 }),
+    field.text('company', 'Empresa / local', 'Estúdio Aurora', { maxLength: 48, allowEmpty: true }),
+    ...logoControls({ side: 'right' }),
     ...controls({ accent: '#ffb703', text: '#ffffff', plate: '#16161a', font: 'inter', position: 'left' }),
     ...opacityControls([
         ['bar', 'Barra de destaque'], ['plate', 'Fundo da placa'], ['name', 'Nome'], ['title', 'Cargo'], ['company', 'Empresa'], ['logo', 'Logo'],
@@ -57,7 +57,8 @@ function setup(root, ctx) {
 
     let logoBox = null;
     if (hasLogo) {
-        logoBox = ctx.layer('logo', el('div', { width: `${logoSize}px`, height: `${logoSize}px`, flex: 'none' }, plate));
+        // `order` posiciona o logo à esquerda (-1) ou à direita (1) do bloco de texto
+        logoBox = ctx.layer('logo', el('div', { width: `${logoSize}px`, height: `${logoSize}px`, flex: 'none', order: values.logoSide === 'left' ? -1 : 1 }, plate));
         const img = document.createElement('img');
         img.src = values.logo;
         set(img, { width: '100%', height: '100%', objectFit: 'contain', display: 'block' });

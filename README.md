@@ -5,39 +5,34 @@ Edite no navegador, exporte **.mov com alfa real** e **.mp4 com fundo verde (chr
 
 > "Precisa de uma lower? Tenha ela num piscar de olhos — um piscar para entrar e outro para sair."
 
-## Instalação (Windows)
+## Instalação (Windows) — jeito fácil
+Dê **duplo clique em `iniciar-blinkframe.bat`**. Ele abre o CMD, chama o PowerShell e:
+1. **Na primeira vez** verifica Node.js 18+, FFmpeg (oferece `winget install Gyan.FFmpeg`), faz `npm install`, usa o Microsoft Edge já instalado (ou baixa o Chromium) e roda o diagnóstico. Depois grava `.blinkframe-ok.json`.
+2. **Nas próximas vezes** pula a verificação e vai direto ao servidor, abrindo o navegador em http://127.0.0.1:3000.
+3. **Mantenha a janela aberta** enquanto usar: fechar a janela (ou Ctrl+C) encerra o programa.
 
-Pré-requisitos: **Node.js 18+** (https://nodejs.org) e **FFmpeg** no PATH.
+Refazer a verificação: `iniciar-blinkframe.bat verificar`. Se a porta 3000 estiver ocupada, ele usa a próxima livre.
+
+## Instalação manual
+Pré-requisitos: **Node.js 18+** e **FFmpeg** no PATH.
 
 ```powershell
-# 1) FFmpeg (se ainda não tiver) — depois feche e reabra o terminal
-winget install Gyan.FFmpeg
-ffmpeg -version
-
-# 2) Dependências do projeto
-cd blinkframe
+winget install Gyan.FFmpeg          # depois feche e reabra o terminal
 npm install
-
-# 3) Navegador headless para exportar — escolha UMA opção:
-npm run browser                      # A) baixa o Chromium do Playwright (~150 MB, uma vez)
-$env:BF_BROWSER_CHANNEL="msedge"     # B) usa o Microsoft Edge já instalado (sem download)
-
-# 4) Diagnóstico (Node, FFmpeg, fontes, navegador)
-npm run check
-
-# 5) Rodar
-npm start                            # abre em http://127.0.0.1:3000
+npm run browser                     # A) Chromium do Playwright (~150 MB, uma vez)
+$env:BF_BROWSER_CHANNEL="msedge"    # B) ou o Edge já instalado
+npm run check                       # diagnóstico
+npm start                           # http://127.0.0.1:3000
 ```
+No CMD use `set` em vez de `$env:`. Outra porta: `$env:PORT=3001`. FFmpeg fora do PATH: `$env:FFMPEG_PATH` / `FFPROBE_PATH`.
 
-No CMD use `set BF_BROWSER_CHANNEL=msedge` em vez de `$env:...`. Outra porta: `$env:PORT=3001; npm start`.
-FFmpeg fora do PATH: `$env:FFMPEG_PATH="C:\ffmpeg\bin\ffmpeg.exe"` (e `FFPROBE_PATH` para o teste).
-
-Teste ponta a ponta (renderiza os 3 templates e valida alfa, chroma e áudio com ffprobe): `npm run test:render`
+Teste ponta a ponta (renderiza os 4 templates e valida alfa, chroma e áudio): `npm run test:render`
 
 ## Como usar
 1. Escolha um modelo na vitrine (passe o mouse para ver ao vivo).
-2. No editor, altere texto, cores, fonte, posição, tamanho, velocidade e logo. Espaço = play/pause, ←/→ = quadro a quadro (Shift = 10).
-3. **Exportar vídeo** → baixe o `.mov` (ProRes 4444 ou PNG com alfa) e/ou o `.mp4` verde (use "Chroma Key"/"Ultra Key" cor #00FF00).
+2. No editor o painel é dividido em seções dobráveis (como no Photoshop; o que está aberto fica lembrado): **Formato e posição** (16:9 · YouTube, 9:16, 1:1; esquerda/centro/direita), **Conteúdo**, **Ícone e mídia** (biblioteca ou seu SVG/PNG; lado esquerdo/direito), **Aparência** (cores, fonte com prévia), **Paletas e estilos salvos**, **Transparência**, **Áudio e efeitos** e **Ajustes avançados**. Espaço = play/pause, ←/→ = quadro a quadro (Shift = 10).
+3. **Paletas e estilos:** salve as cores (ou cores + fonte + posição) e aplique em qualquer outro template; exporte/importe em `.json`.
+4. **Exportar vídeo** → baixe o `.mov` (ProRes 4444 ou PNG com alfa) e/ou o `.mp4` verde (use "Chroma Key"/"Ultra Key" cor #00FF00).
 
 ## Logo interativa
 `public/js/brand.js` carrega o SVG da logo inline e move só a íris: ao passar o mouse sobre cards, botões, abas e controles ela desliza de leve na direção do elemento e volta ao centro ao sair; sobre a própria marca ela acompanha o cursor (íris azul, como no arquivo "Procurando o Mouse"). Sem hover, fica parada. `prefers-reduced-motion` desliga o movimento. Os três SVGs originais ficam em `public/brand/` (o favicon é o "Aberto Normal" sobre ladrilho arredondado).
@@ -58,18 +53,23 @@ blinkframe/
 │  ├─ editor.html          # editor
 │  ├─ runner.html          # palco do template (iframe do editor e do exportador)
 │  ├─ engine/              # motor determinístico: kit.js, parts.js, fonts.js, runner.js
-│  ├─ css/ js/             # interface
+│  ├─ css/ js/             # interface (js/editor/: state, panel, controls, presets, output, transport, export)
+│  ├─ presets/             # paletas embutidas (palettes.json)
 │  ├─ brand/               # logos SVG + favicon
 │  └─ sounds/              # efeitos .wav padrão
 ├─ templates/              # um modelo = uma pasta (meta.json + template.js)
 │  ├─ entrevista-classica/
 │  ├─ lower-minimalista/
-│  └─ destaque-noticia/
-├─ scripts/                # check-env, make-sounds, smoke-test
+│  ├─ destaque-noticia/
+│  └─ entrevista-microfone/  # selo superior + ícone trocável/lado
+├─ docs/GUIA-TEMPLATES.md  # como estender (templates, paletas, fontes, ícones, IA)
+├─ iniciar-blinkframe.bat  # inicializador Windows (+ scripts/iniciar.ps1)
+├─ scripts/                # check-env, make-sounds, smoke-test, iniciar.ps1
 └─ output/                 # renders (limpos após 24 h)
 ```
 
 ## Criando um novo template
+Guia completo (campos, seções, paletas, fontes, ícones, instruções para IA): **docs/GUIA-TEMPLATES.md**. Resumo:
 1. Crie `templates/meu-modelo/meta.json` (`name`, `description`, `tags`, `order`).
 2. Crie `templates/meu-modelo/template.js` com `export default { fields, sizes, duration, thumbAt, sounds, setup, render }`
    — copie um existente. `render(t, state, ctx)` deve depender **só de `t`** (nada de timers, transitions ou `Math.random`; use `rand(seed)`).
@@ -79,6 +79,9 @@ blinkframe/
 
 Sons próprios: coloque `nome.wav` em `public/sounds/` (global) ou em `templates/<slug>/sounds/` (só daquele modelo) e use `{ at, sound: 'nome', gain }` em `sounds`.
 Fontes novas: `npm i @fontsource/<fonte>` e uma linha em `public/engine/fonts.js`.
+
+## Modo ao vivo (gancho para OBS)
+O estado (campos) é independente de como é exibido. `/runner.html?template=<slug>&mode=live&channel=<id>` mostra o template com fundo transparente e sem interface, comandado por mensagens `in`/`out`/`toggle` (BroadcastChannel, ver `public/engine/protocol.js` e `public/js/editor/output.js`). A tela de controle ao vivo ainda não existe; a base está pronta.
 
 ## Notas técnicas
 - **Determinismo:** cada quadro é pedido por `window.renderFrame(t)`, `t = frame / fps`; o export também injeta CSS que desativa transitions/animations.

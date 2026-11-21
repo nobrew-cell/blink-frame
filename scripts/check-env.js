@@ -23,9 +23,12 @@ if (ff.version) ok(ff.version);
 for (const problem of ff.problems) bad(problem);
 if (!ff.version) console.log('      Instale no Windows:  winget install Gyan.FFmpeg   (depois feche e reabra o terminal)');
 
-existsSync(path.join(ROOT, 'node_modules', '@fontsource', 'inter'))
-    ? ok('Fontes offline (@fontsource) instaladas')
-    : bad('Fontes não encontradas — rode "npm install"');
+existsSync(path.join(ROOT, 'public', 'fonts', 'inter', 'inter-latin-400-normal.woff2'))
+    ? ok('Fontes offline (public/fonts) presentes')
+    : bad('Pasta public/fonts incompleta — copie o projeto inteiro (as fontes vêm junto, sem download)');
+existsSync(path.join(ROOT, 'node_modules', 'express'))
+    ? ok('Dependências instaladas (node_modules)')
+    : bad('Dependências não instaladas — rode "npm install"');
 
 const launch = { headless: true };
 if (process.env.BF_BROWSER_CHANNEL) launch.channel = process.env.BF_BROWSER_CHANNEL;

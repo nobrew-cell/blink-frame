@@ -5,15 +5,15 @@
  * Linha do tempo (s):  0.00 selo · 0.25 manchete (wipe) · 0.50 brilho · 0.95 apoio (wipe) + digitação
  *                      6.10 saída reversa · 7.0 fim
  */
-import { el, set, fit, controls, opacityControls, logoField, typing, inOut, prog, ease } from '../../engine/kit.js';
+import { el, set, fit, field, controls, logoControls, opacityControls, typing, inOut, prog, ease } from '../../engine/kit.js';
 import { anchor, backdrop, layoutWidth, wipe, typewriter, pulse, shine } from '../../engine/parts.js';
 
 const fields = [
-    { key: 'tag', type: 'text', label: 'Selo', default: 'AO VIVO', maxLength: 18 },
-    { key: 'headline', type: 'text', label: 'Texto principal (manchete)', default: 'Prefeitura anuncia novo plano de mobilidade para o centro da cidade', maxLength: 110 },
-    { key: 'subtitle', type: 'text', label: 'Subtítulo (apoio)', default: 'São Paulo · Reportagem especial', maxLength: 80 },
-    logoField('Logo (opcional)'),
-    { key: 'dot', type: 'toggle', label: 'Ponto pulsante no selo', default: true },
+    field.text('tag', 'Selo', 'AO VIVO', { maxLength: 18 }),
+    field.text('headline', 'Texto principal (manchete)', 'Prefeitura anuncia novo plano de mobilidade para o centro da cidade', { maxLength: 110 }),
+    field.text('subtitle', 'Subtítulo (apoio)', 'São Paulo · Reportagem especial', { maxLength: 80 }),
+    ...logoControls({ side: 'right' }),
+    field.toggle('dot', 'Ponto pulsante no selo', true),
     ...controls({ accent: '#e11d2e', text: '#ffffff', plate: '#14161c', font: 'oswald', position: 'left' }),
     ...opacityControls([
         ['tag', 'Selo'], ['headPlate', 'Fundo da manchete'], ['headline', 'Manchete'], ['logo', 'Logo'],
@@ -62,7 +62,7 @@ function setup(root, ctx) {
         headline.style.fontSize = `${fontSize}px`;
     }
     if (hasLogo) {
-        const logoBox = ctx.layer('logo', el('div', { width: `${logoSize}px`, height: `${logoSize}px`, flex: 'none' }, headPlate));
+        const logoBox = ctx.layer('logo', el('div', { width: `${logoSize}px`, height: `${logoSize}px`, flex: 'none', order: values.logoSide === 'left' ? -1 : 1 }, headPlate));
         const img = document.createElement('img');
         img.src = values.logo;
         set(img, { width: '100%', height: '100%', objectFit: 'contain', display: 'block' });
@@ -109,6 +109,7 @@ export default {
     sizes: ['landscape', 'vertical', 'square'],
     duration: DURATION,
     thumbAt: 3,
+    holdAt: 4.5, // legenda digitada por completo
     fonts: ['oswald'],
     sounds: (ctx) => [
         { at: 0, sound: 'whoosh-in', gain: 0.45 },
