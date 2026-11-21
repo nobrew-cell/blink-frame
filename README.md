@@ -75,6 +75,8 @@ blinkframe/
    — copie um existente. `render(t, state, ctx)` deve depender **só de `t`** (nada de timers, transitions ou `Math.random`; use `rand(seed)`).
 3. Recarregue a vitrine: o modelo aparece sozinho. Os controles do editor nascem do array `fields`.
 
+**Transparência por elemento:** declare os elementos com `...opacityControls([['plate','Fundo'],['name','Nome']])` em `fields` e registre cada nó no `setup` com `ctx.layer('plate', node)`. O editor ganha a seção "Transparência dos elementos" (um slider 0–100% por item). Para o fundo de um contêiner ter opacidade própria sem apagar o conteúdo, use `backdrop(contêiner, cor)` de `parts.js` e registre o retorno.
+
 Sons próprios: coloque `nome.wav` em `public/sounds/` (global) ou em `templates/<slug>/sounds/` (só daquele modelo) e use `{ at, sound: 'nome', gain }` em `sounds`.
 Fontes novas: `npm i @fontsource/<fonte>` e uma linha em `public/engine/fonts.js`.
 

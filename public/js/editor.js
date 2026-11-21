@@ -37,14 +37,14 @@ const store = {
 
 /* ---------- comunicação com o runner ---------- */
 const win = () => frame.contentWindow;
-const pushFields = () => win().postMessage({ type: 'dp:fields', fields: state.values, size: state.size }, location.origin);
+const pushFields = () => win().postMessage({ type: 'bf:fields', fields: state.values, size: state.size }, location.origin);
 const schedulePush = debounce(() => { pushFields(); store.set({ values: state.values, size: state.size }); }, 90);
 
 window.addEventListener('message', (event) => {
     if (event.origin !== location.origin || event.source !== frame.contentWindow) return;
-    if (event.data?.type === 'dp:ready') onReady();
-    else if (event.data?.type === 'dp:configured') onConfigured();
-    else if (event.data?.type === 'dp:error') showStageError(event.data.message);
+    if (event.data?.type === 'bf:ready') onReady();
+    else if (event.data?.type === 'bf:configured') onConfigured();
+    else if (event.data?.type === 'bf:error') showStageError(event.data.message);
 });
 
 function showStageError(message) {
@@ -125,9 +125,22 @@ function buildControls() {
     const root = $('controls');
     root.replaceChildren();
     for (const [title, types] of GROUPS) {
-        const fields = state.schema.filter((f) => types.includes(f.type ?? 'text'));
+        const fields = state.schema.filter((f) => f.group !== 'opacity' && types.includes(f.type ?? 'text'));
         if (!fields.length) continue;
         root.append(el('section', { className: 'group' }, el('h2', { textContent: title }), ...fields.map(buildField)));
+    }
+    // Transparência: um controle de opacidade por elemento do template (ver opacityControls() no kit)
+    const layers = state.schema.filter((f) => f.group === 'opacity');
+    if (layers.length) {
+        const reset = el('button', { type: 'button', className: 'link', textContent: 'Tudo visível' });
+        reset.addEventListener('click', () => {
+            for (const f of layers) state.values[f.key] = f.default;
+            buildControls();
+            schedulePush();
+        });
+        root.append(el('section', { className: 'group opacity-group' }, el('h2', { textContent: 'Transparência dos elementos' }),
+            el('p', { className: 'hint', textContent: '100% = totalmente visível · 0% = escondido. Cada elemento é independente.' }),
+            ...layers.map(buildField), reset));
     }
 }
 
@@ -177,7 +190,10 @@ function buildField(field) {
         }
         case 'range': {
             const readout = el('span', { className: 'value' });
-            const show = (v) => { readout.textContent = field.key === 'speed' || field.key === 'scale' ? `${Number(v).toFixed(2)}×` : String(v); };
+            const show = (v) => {
+                readout.textContent = field.group === 'opacity' ? `${Math.round(Number(v) * 100)}%`
+                    : field.key === 'speed' || field.key === 'scale' ? `${Number(v).toFixed(2)}×` : String(v);
+            };
             const input = el('input', { type: 'range', id, min: field.min, max: field.max, step: field.step ?? 0.01, value });
             show(value);
             input.addEventListener('input', () => { show(input.value); set(field.key, Number(input.value)); });

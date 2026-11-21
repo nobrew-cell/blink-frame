@@ -5,8 +5,8 @@
  * Linha do tempo (s):  0.00 selo · 0.25 manchete (wipe) · 0.50 brilho · 0.95 apoio (wipe) + digitação
  *                      6.10 saída reversa · 7.0 fim
  */
-import { el, set, fit, controls, logoField, typing, inOut, prog, ease } from '../../engine/kit.js';
-import { anchor, layoutWidth, wipe, typewriter, pulse, shine } from '../../engine/parts.js';
+import { el, set, fit, controls, opacityControls, logoField, typing, inOut, prog, ease } from '../../engine/kit.js';
+import { anchor, backdrop, layoutWidth, wipe, typewriter, pulse, shine } from '../../engine/parts.js';
 
 const fields = [
     { key: 'tag', type: 'text', label: 'Selo', default: 'AO VIVO', maxLength: 18 },
@@ -15,6 +15,10 @@ const fields = [
     logoField('Logo (opcional)'),
     { key: 'dot', type: 'toggle', label: 'Ponto pulsante no selo', default: true },
     ...controls({ accent: '#e11d2e', text: '#ffffff', plate: '#14161c', font: 'oswald', position: 'left' }),
+    ...opacityControls([
+        ['tag', 'Selo'], ['headPlate', 'Fundo da manchete'], ['headline', 'Manchete'], ['logo', 'Logo'],
+        ['subPlate', 'Fundo da linha de apoio'], ['subtitle', 'Subtítulo'],
+    ]),
 ];
 
 const DURATION = 7;
@@ -29,10 +33,10 @@ function setup(root, ctx) {
     const col = el('div', { display: 'flex', flexDirection: 'column', alignItems: align, maxWidth: `${maxW}px` }, box);
 
     // Selo inclinado
-    const tag = el('div', {
+    const tag = ctx.layer('tag', el('div', {
         display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 34px 10px 22px', background: 'var(--accent)',
         clipPath: 'polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%)', zIndex: 2,
-    }, col);
+    }, col));
     let dot = null;
     if (values.dot) dot = el('div', { width: '16px', height: '16px', borderRadius: '50%', background: '#fff', flex: 'none' }, tag);
     el('div', { font: '700 30px/1 var(--font)', letterSpacing: '0.08em', color: '#fff', whiteSpace: 'nowrap' }, tag, values.tag.toUpperCase());
@@ -41,14 +45,15 @@ function setup(root, ctx) {
     const logoSize = 92;
     const hasLogo = Boolean(values.logo);
     const headPlate = el('div', {
-        display: 'flex', alignItems: 'center', gap: '28px', padding: '22px 36px 24px 30px', background: 'var(--plate)',
+        display: 'flex', alignItems: 'center', gap: '28px', padding: '22px 36px 24px 30px',
         maxWidth: `${maxW}px`, boxSizing: 'border-box',
     }, col);
+    ctx.layer('headPlate', backdrop(headPlate, 'var(--plate)'));
     const textMax = maxW - 30 - 36 - (hasLogo ? logoSize + 28 : 0);
-    const headline = el('div', {
+    const headline = ctx.layer('headline', el('div', {
         font: '700 56px/1.12 var(--font)', color: 'var(--text)', maxWidth: `${textMax}px`, overflowWrap: 'anywhere',
         textAlign: position === 'center' ? 'center' : position === 'right' ? 'right' : 'left',
-    }, headPlate, values.headline);
+    }, headPlate, values.headline));
     // Até 2 linhas: reduz a fonte até a altura caber em 2 linhas do tamanho atual
     let fontSize = 56;
     headline.style.fontSize = `${fontSize}px`;
@@ -57,7 +62,7 @@ function setup(root, ctx) {
         headline.style.fontSize = `${fontSize}px`;
     }
     if (hasLogo) {
-        const logoBox = el('div', { width: `${logoSize}px`, height: `${logoSize}px`, flex: 'none' }, headPlate);
+        const logoBox = ctx.layer('logo', el('div', { width: `${logoSize}px`, height: `${logoSize}px`, flex: 'none' }, headPlate));
         const img = document.createElement('img');
         img.src = values.logo;
         set(img, { width: '100%', height: '100%', objectFit: 'contain', display: 'block' });
@@ -66,14 +71,15 @@ function setup(root, ctx) {
 
     // Linha de apoio
     const sub = el('div', {
-        padding: '12px 34px 12px 30px', background: 'var(--accent)', maxWidth: `${maxW}px`, boxSizing: 'border-box',
+        padding: '12px 34px 12px 30px', maxWidth: `${maxW}px`, boxSizing: 'border-box',
     }, col);
     const subText = typewriter(sub, {
         text: values.subtitle,
         styles: { font: '400 30px/1.2 var(--font)', color: '#fff', whiteSpace: 'nowrap', letterSpacing: '0.03em' },
         cps: 34, start: SUB_START + 0.1,
     });
-    const subNode = sub.firstChild;
+    const subNode = ctx.layer('subtitle', sub.firstChild);
+    ctx.layer('subPlate', backdrop(sub, 'var(--accent)'));
     fit(subNode, { maxWidth: maxW - 64, maxSize: 30, minSize: 14 });
 
     return {

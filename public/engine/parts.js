@@ -155,6 +155,15 @@ export const initials = (text, fallback = 'YN') =>
  * Linha de texto dentro de uma "máscara" (overflow: hidden): o texto sobe de baixo para dentro da máscara.
  * Retorna { wrap, node, update(p) } — `p` 0 = escondido abaixo, 1 = visível, valores acima de 1 = sai por cima.
  */
+/**
+ * Fundo próprio (camada separada) para um contêiner: assim a opacidade do fundo muda sem afetar o conteúdo.
+ * O contêiner vira um contexto de empilhamento; o fundo fica atrás dos filhos. Registre o retorno com ctx.layer().
+ */
+export function backdrop(parent, background) {
+    set(parent, { position: 'relative', isolation: 'isolate' });
+    return el('div', { position: 'absolute', inset: 0, background, zIndex: -1, pointerEvents: 'none' }, parent);
+}
+
 export function maskLine(parent, text, styles = {}) {
     const wrap = el('div', { overflow: 'hidden', padding: '0.08em 0.02em', margin: '-0.08em -0.02em' }, parent);
     const node = el('div', { whiteSpace: 'nowrap', display: 'inline-block', ...styles }, wrap, text);

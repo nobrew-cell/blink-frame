@@ -5,7 +5,7 @@
  * Linha do tempo (s):  0.00 fio desenha · 0.10–0.9 letras do nome · 0.60 subtítulo
  *                      3.90 saída (fade + deriva) · 4.5 fim
  */
-import { el, set, letters, controls, logoField, prog, ease, fit } from '../../engine/kit.js';
+import { el, set, letters, controls, opacityControls, logoField, prog, ease, fit } from '../../engine/kit.js';
 import { anchor, layoutWidth } from '../../engine/parts.js';
 
 const fields = [
@@ -14,6 +14,7 @@ const fields = [
     logoField('Logo (opcional)'),
     { key: 'shadow', type: 'toggle', label: 'Sombra suave (legibilidade)', default: true },
     ...controls({ accent: '#ffb703', text: '#ffffff', font: 'bricolage', position: 'left' }),
+    ...opacityControls([['name', 'Nome'], ['rule', 'Fio de destaque'], ['title', 'Cargo'], ['logo', 'Logo']]),
 ];
 
 const DURATION = 5;
@@ -30,7 +31,7 @@ function setup(root, ctx) {
 
     let logoEl = null;
     if (values.logo) {
-        logoEl = el('div', { width: '88px', height: '88px', flex: 'none', marginBottom: '6px' }, wrap);
+        logoEl = ctx.layer('logo', el('div', { width: '88px', height: '88px', flex: 'none', marginBottom: '6px' }, wrap));
         const img = document.createElement('img');
         img.src = values.logo;
         set(img, { width: '100%', height: '100%', objectFit: 'contain', display: 'block' });
@@ -43,15 +44,16 @@ function setup(root, ctx) {
     const nameNode = el('div', {
         font: '700 72px/1.1 var(--font)', color: 'var(--text)', whiteSpace: 'nowrap', textShadow: shadow, letterSpacing: '-0.01em',
     }, col);
+    ctx.layer('name', nameNode);
     const chars = letters(nameNode, values.name);
     fit(nameNode, { maxWidth: textMax, maxSize: 72, minSize: 30 });
 
-    const rule = el('div', { height: '5px', width: '100%', margin: '14px 0 16px', background: 'var(--accent)', transformOrigin: `${position === 'right' ? 'right' : position === 'center' ? 'center' : 'left'} center`, borderRadius: '3px' }, col);
+    const rule = ctx.layer('rule', el('div', { height: '5px', width: '100%', margin: '14px 0 16px', background: 'var(--accent)', transformOrigin: `${position === 'right' ? 'right' : position === 'center' ? 'center' : 'left'} center`, borderRadius: '3px' }, col));
 
-    const titleNode = el('div', {
+    const titleNode = ctx.layer('title', el('div', {
         font: '400 28px/1.2 var(--font)', color: 'var(--text)', whiteSpace: 'nowrap', textTransform: 'uppercase',
         letterSpacing: '0.2em', textShadow: shadow, opacity: 0,
-    }, col, values.title);
+    }, col, values.title));
     fit(titleNode, { maxWidth: textMax, maxSize: 28, minSize: 14 });
 
     return { position, chars, rule, titleNode, logoEl, nameNode };

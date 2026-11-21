@@ -15,8 +15,8 @@
  *   window.renderFrame(t)        →  render(t * speed, state, ctx)      (t = tempo da SAÍDA, em segundos)
  *
  * Protocolo com o editor (iframe de mesma origem):
- *   editor → runner : { type: 'dp:fields', fields, size }
- *   runner → editor : { type: 'dp:ready' } (1ª vez)  e  { type: 'dp:configured' } (a cada reconfiguração)
+ *   editor → runner : { type: 'bf:fields', fields, size }
+ *   runner → editor : { type: 'bf:ready' } (1ª vez)  e  { type: 'bf:configured' } (a cada reconfiguração)
  *   estado exposto  : window.__template  { fields, sizes, size, values, width, height, duration, thumbAt, sounds }
  */
 
@@ -217,7 +217,7 @@ export function loadFont(id) {
  *   color   { key, label, default }                  → "#rrggbb"
  *   font    { key, label, default }                  → id de fonts.js
  *   select  { key, label, default, options:[{value,label}] }
- *   range   { key, label, default, min, max, step }
+ *   range   { key, label, default, min, max, step, group? }   (group:'opacity' → painel "Transparência"; ver opacityControls)
  *   toggle  { key, label, default }                  → boolean
  *   image   { key, label, default: '' }              → data URL PNG/JPEG/WebP (logo)
  */
@@ -244,6 +244,18 @@ export function controls({ accent, text, plate, font, position, scale = true, sp
     if (speed) list.push({ key: 'speed', type: 'range', label: 'Velocidade da animação', default: 1, min: 0.75, max: 1.5, step: 0.05 });
     return list;
 }
+
+/**
+ * Opacidade independente por elemento. Declare os elementos do design e registre cada um no setup:
+ *   fields: [..., ...opacityControls([['plate', 'Fundo'], ['name', 'Nome'], ['logo', 'Logo']])]
+ *   setup:  ctx.layer('plate', node)      // devolve o próprio node
+ * O motor multiplica, a cada quadro, a opacidade do usuário (0..1) pela opacidade que o template animou
+ * no node (ou pela inicial do estilo): fade-in/out continuam funcionando, só que escalados.
+ * Registre nós cuja opacidade não é a de um ancestral que já foi registrado (opacidade de pai afeta os filhos).
+ */
+export const opacityControls = (layers) => layers.map(([key, label]) => ({
+    key: `opacity_${key}`, type: 'range', label, default: 1, min: 0, max: 1, step: 0.05, group: 'opacity',
+}));
 
 /** Campo de logo/imagem. Valor vazio = sem logo. */
 export const logoField = (label = 'Logo', key = 'logo') => ({ key, type: 'image', label, default: '' });
@@ -337,6 +349,18 @@ export function defineTemplate(template) {
     let current = template.thumbAt ?? 0; // instante de SAÍDA mostrado (re-renderizado ao reconfigurar)
     let speed = 1;
     let calls = 0;
+    let layers = []; // [{ node, base, value }] registrados por ctx.layer() no setup
+
+    /** Aplica o instante `t` (timeline do template) e depois escala a opacidade de cada camada registrada. */
+    function draw(t) {
+        for (const layer of layers) layer.node.style.opacity = layer.base; // volta ao estado inicial: sem acumular entre quadros
+        template.render(t, state, ctx);
+        for (const layer of layers) {
+            if (layer.value === 1) continue;
+            const animated = layer.node.style.opacity;
+            layer.node.style.opacity = String((animated === '' ? 1 : Number(animated)) * layer.value);
+        }
+    }
 
     async function configure({ fields: input = {}, size } = {}) {
         const call = ++calls;
@@ -349,7 +373,15 @@ export function defineTemplate(template) {
         await Promise.all([...fontKeys, ...(template.fonts ?? [])].map(loadFont));
         if (call !== calls) return window.__template; // uma chamada mais nova (digitação rápida) vence
 
-        ctx = { values, size: chosen, W, H };
+        layers = [];
+        ctx = {
+            values, size: chosen, W, H,
+            layer(key, node) {
+                const value = values[`opacity_${key}`];
+                if (node) layers.push({ node, base: node.style.opacity, value: typeof value === 'number' ? value : 1 });
+                return node;
+            },
+        };
         speed = typeof values.speed === 'number' ? values.speed : 1;
 
         stage.replaceChildren();
@@ -368,7 +400,7 @@ export function defineTemplate(template) {
         await Promise.all([...stage.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
         if (call !== calls) return window.__template;
 
-        template.render(clamp(current * speed, 0, template.duration), state, ctx);
+        draw(clamp(current * speed, 0, template.duration));
 
         window.__template = {
             meta: template.meta ?? {},
@@ -391,7 +423,7 @@ export function defineTemplate(template) {
     /** Renderiza o instante `t` (segundos de SAÍDA). Síncrono e puro em relação a `t`. */
     window.renderFrame = (t) => {
         current = t;
-        if (state) template.render(clamp(t * speed, 0, template.duration), state, ctx);
+        if (state) draw(clamp(t * speed, 0, template.duration));
     };
     window.__configure = configure;
 
@@ -412,15 +444,15 @@ export function defineTemplate(template) {
     };
 
     window.addEventListener('message', async (event) => {
-        if (event.origin !== location.origin || event.data?.type !== 'dp:fields') return;
+        if (event.origin !== location.origin || event.data?.type !== 'bf:fields') return;
         await configure({ fields: event.data.fields ?? ctx?.values, size: event.data.size ?? ctx?.size });
-        if (window.parent !== window) window.parent.postMessage({ type: 'dp:configured' }, location.origin);
+        if (window.parent !== window) window.parent.postMessage({ type: 'bf:configured' }, location.origin);
     });
 
     return (async () => {
         await document.fonts.ready;
         await configure({ fields: decodeFields(params.get('fields')), size: params.get('size') });
-        if (window.parent !== window) window.parent.postMessage({ type: 'dp:ready' }, location.origin);
+        if (window.parent !== window) window.parent.postMessage({ type: 'bf:ready' }, location.origin);
         if (params.get('play')) window.__play(true);
         return true;
     })();
