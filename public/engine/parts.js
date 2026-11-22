@@ -128,6 +128,24 @@ export const wipe = (position, p) => {
 /* Texto                                                                       */
 /* ========================================================================== */
 
+/**
+ * Ícone de um campo `field.icon`: id da biblioteca (desenhado em `color`) OU imagem enviada pelo usuário
+ * (mantém as próprias cores, ajustada ao quadrado `size`). Retorna o nó criado.
+ */
+export function iconNode(parent, value, size, { color = 'currentColor', styles = {} } = {}) {
+    if (typeof value === 'string' && value.startsWith('data:')) {
+        const box = el('div', { width: `${size}px`, height: `${size}px`, flex: 'none', ...styles }, parent);
+        const img = document.createElement('img');
+        img.alt = '';
+        img.draggable = false;
+        img.src = value;
+        set(img, { width: '100%', height: '100%', objectFit: 'contain', display: 'block' });
+        box.append(img);
+        return box;
+    }
+    return svg(value, parent, { width: `${size}px`, height: `${size}px`, color, flex: 'none', ...styles });
+}
+
 /** Ícone do kit com tamanho e cor. */
 export const icon = (name, size, color, parent, extra = {}) =>
     svg(name, parent, { width: `${size}px`, height: `${size}px`, color, flex: 'none', ...extra });
@@ -152,10 +170,6 @@ export const initials = (text, fallback = 'YN') =>
     text.replace(/[^\p{L}\p{N} ]/gu, '').split(' ').filter(Boolean).map((word) => word[0]).join('').slice(0, 2).toUpperCase() || fallback;
 
 /**
- * Linha de texto dentro de uma "máscara" (overflow: hidden): o texto sobe de baixo para dentro da máscara.
- * Retorna { wrap, node, update(p) } — `p` 0 = escondido abaixo, 1 = visível, valores acima de 1 = sai por cima.
- */
-/**
  * Fundo próprio (camada separada) para um contêiner: assim a opacidade do fundo muda sem afetar o conteúdo.
  * O contêiner vira um contexto de empilhamento; o fundo fica atrás dos filhos. Registre o retorno com ctx.layer().
  */
@@ -164,6 +178,10 @@ export function backdrop(parent, background) {
     return el('div', { position: 'absolute', inset: 0, background, zIndex: -1, pointerEvents: 'none' }, parent);
 }
 
+/**
+ * Linha de texto dentro de uma "máscara" (overflow: hidden): o texto sobe de baixo para dentro da máscara.
+ * Retorna { wrap, node, update(p) } — `p` 0 = escondido abaixo, 1 = visível, valores acima de 1 = sai por cima.
+ */
 export function maskLine(parent, text, styles = {}) {
     const wrap = el('div', { overflow: 'hidden', padding: '0.08em 0.02em', margin: '-0.08em -0.02em' }, parent);
     const node = el('div', { whiteSpace: 'nowrap', display: 'inline-block', ...styles }, wrap, text);

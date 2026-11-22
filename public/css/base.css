@@ -1,9 +1,9 @@
 /* BlinkFrame — tokens, fontes (offline) e marca. Compartilhado pela vitrine e pelo editor. */
-@font-face { font-family: "Bricolage Grotesque"; font-weight: 400; font-display: swap; src: url(/vendor/fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-400-normal.woff2) format("woff2"); }
-@font-face { font-family: "Bricolage Grotesque"; font-weight: 700; font-display: swap; src: url(/vendor/fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-700-normal.woff2) format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url(/vendor/fontsource/inter/files/inter-latin-400-normal.woff2) format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url(/vendor/fontsource/inter/files/inter-latin-500-normal.woff2) format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url(/vendor/fontsource/inter/files/inter-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Bricolage Grotesque"; font-weight: 400; font-display: swap; src: url(/fonts/bricolage-grotesque/bricolage-grotesque-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Bricolage Grotesque"; font-weight: 700; font-display: swap; src: url(/fonts/bricolage-grotesque/bricolage-grotesque-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url(/fonts/inter/inter-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url(/fonts/inter/inter-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url(/fonts/inter/inter-latin-600-normal.woff2) format("woff2"); }
 
 :root {
     --ink: #1c1e21;

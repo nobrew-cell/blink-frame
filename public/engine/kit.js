@@ -14,15 +14,26 @@
  *   configure({ fields, size })  →  sanitize → carrega fontes → setup(root, ctx) → render(t)
  *   window.renderFrame(t)        →  render(t * speed, state, ctx)      (t = tempo da SAÍDA, em segundos)
  *
- * Protocolo com o editor (iframe de mesma origem):
- *   editor → runner : { type: 'bf:fields', fields, size }
- *   runner → editor : { type: 'bf:ready' } (1ª vez)  e  { type: 'bf:configured' } (a cada reconfiguração)
- *   estado exposto  : window.__template  { fields, sizes, size, values, width, height, duration, thumbAt, sounds }
+ * Protocolo com o editor (iframe de mesma origem) — nomes em protocol.js:
+ *   editor → runner : { type: MSG.FIELDS, fields, size }
+ *   runner → editor : MSG.READY (1ª vez)  e  MSG.CONFIGURED (a cada reconfiguração)
+ *   estado exposto  : window.__template  { fields, sizes, size, values, width, height, duration, thumbAt, holdAt, sounds }
+ *
+ * Os campos (controles) são descritos por schema.js; os modos de exibição (editor, vitrine, ao vivo) por modes.js.
  */
 
 import { FONTS, FONT_BASE } from './fonts.js';
+import { icons } from './icons.js';
+import { normalizeFields, sanitize, field } from './schema.js';
+import { MSG, MODES } from './protocol.js';
+import { createLoop, startLive } from './modes.js';
 
-export { FONTS };
+export { FONTS, icons };
+// Contrato de campos (schema.js) reexportado: os templates importam tudo do kit.
+export {
+    field, controls, logoControls, iconControls, opacityControls, sanitize, normalizeFields,
+    SECTIONS, SIZE_META, ALIGN_OPTIONS, SIDE_OPTIONS,
+} from './schema.js';
 
 /* ========================================================================== */
 /* 1. Easings e helpers de progresso                                           */
@@ -96,27 +107,6 @@ export const svgEl = (tag, attrs = {}, parent = null) => {
     for (const [name, value] of Object.entries(attrs)) node.setAttribute(name, value);
     if (parent) parent.appendChild(node);
     return node;
-};
-
-/** Ícones próprios do kit (viewBox 24x24, markup confiável — nunca vem do usuário). */
-export const icons = {
-    bell: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a6 6 0 0 0-6 6v3.6l-1.7 3A1 1 0 0 0 5.2 16h13.6a1 1 0 0 0 .9-1.4L18 11.6V8a6 6 0 0 0-6-6Zm0 20a3 3 0 0 0 2.8-2H9.2A3 3 0 0 0 12 22Z"/></svg>',
-    like: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 10h4v11H2zM8 21h9.2a2 2 0 0 0 2-1.6l1.6-7.5A2 2 0 0 0 18.9 9.5H14l.8-4.3a1.8 1.8 0 0 0-3.3-1.3L8 10z"/></svg>',
-    comment: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg>',
-    arrowRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M12 5l7 7-7 7"/></svg>',
-    arrowDown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5 12l7 7 7-7"/></svg>',
-    play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
-    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
-    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg>',
-    heart: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.5 1.1 4.3 2.4h2c.8-1.3 2.2-2.4 4.3-2.4 3.7 0 5.8 3.8 4.3 7.2C19.5 16.4 12 21 12 21Z"/></svg>',
-    mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5M8.5 21.5h7"/></svg>',
-    quote: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20v-6.5C3 8.4 5.6 5 10 4l.8 2.2C8.3 7.1 7 9 7 11h4v9Zm10 0v-6.5C13 8.4 15.6 5 20 4l.8 2.2C18.3 7.1 17 9 17 11h4v9Z"/></svg>',
-    bolt: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2 4 13.5h6.5L9.5 22 20 9.5h-6.5Z"/></svg>',
-    broadcast: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M4.9 4.9a10 10 0 0 0 0 14.2M19.1 4.9a10 10 0 0 1 0 14.2"/></svg>',
-    star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2.5 2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5-4.9-4.5 6.6-.8Z"/></svg>',
-    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
-    at: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/></svg>',
-    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>',
 };
 
 /** Insere um dos ícones do kit dentro de um <span> inline-flex. */
@@ -208,94 +198,11 @@ export function loadFont(id) {
 }
 
 /* ========================================================================== */
-/* 5. Schema de campos (controles do editor) e sanitização                    */
+/* 5. Campos: ver schema.js                                                    */
 /* ========================================================================== */
 
-/**
- * Tipos de campo suportados (o editor gera o painel automaticamente a partir deles):
- *   text    { key, label, default, maxLength }
- *   color   { key, label, default }                  → "#rrggbb"
- *   font    { key, label, default }                  → id de fonts.js
- *   select  { key, label, default, options:[{value,label}] }
- *   range   { key, label, default, min, max, step, group? }   (group:'opacity' → painel "Transparência"; ver opacityControls)
- *   toggle  { key, label, default }                  → boolean
- *   image   { key, label, default: '' }              → data URL PNG/JPEG/WebP (logo)
- */
-
-/**
- * Controles comuns. Passe só o que faz sentido para o design:
- *   controls({ accent:'#ffb703', text:'#fff', plate:'#16161a', font:'inter', position:'left', scale:true, speed:true })
- * Os templates leem as cores como variáveis CSS no palco (--accent, --text, --plate, --font)
- * e o restante em `ctx.values` (position, scale, speed).
- */
-export function controls({ accent, text, plate, font, position, scale = true, speed = true } = {}) {
-    const list = [];
-    if (accent) list.push({ key: 'accent', type: 'color', label: 'Cor de destaque', default: accent });
-    if (text) list.push({ key: 'textColor', type: 'color', label: 'Cor do texto', default: text });
-    if (plate) list.push({ key: 'plate', type: 'color', label: 'Cor do fundo', default: plate });
-    if (font) list.push({ key: 'font', type: 'font', label: 'Fonte', default: font });
-    if (position) {
-        list.push({
-            key: 'position', type: 'select', label: 'Posição', default: position,
-            options: [{ value: 'left', label: 'Esquerda' }, { value: 'center', label: 'Centro' }, { value: 'right', label: 'Direita' }],
-        });
-    }
-    if (scale) list.push({ key: 'scale', type: 'range', label: 'Tamanho', default: 1, min: 0.6, max: 1.6, step: 0.05 });
-    if (speed) list.push({ key: 'speed', type: 'range', label: 'Velocidade da animação', default: 1, min: 0.75, max: 1.5, step: 0.05 });
-    return list;
-}
-
-/**
- * Opacidade independente por elemento. Declare os elementos do design e registre cada um no setup:
- *   fields: [..., ...opacityControls([['plate', 'Fundo'], ['name', 'Nome'], ['logo', 'Logo']])]
- *   setup:  ctx.layer('plate', node)      // devolve o próprio node
- * O motor multiplica, a cada quadro, a opacidade do usuário (0..1) pela opacidade que o template animou
- * no node (ou pela inicial do estilo): fade-in/out continuam funcionando, só que escalados.
- * Registre nós cuja opacidade não é a de um ancestral que já foi registrado (opacidade de pai afeta os filhos).
- */
-export const opacityControls = (layers) => layers.map(([key, label]) => ({
-    key: `opacity_${key}`, type: 'range', label, default: 1, min: 0, max: 1, step: 0.05, group: 'opacity',
-}));
-
-/** Campo de logo/imagem. Valor vazio = sem logo. */
-export const logoField = (label = 'Logo', key = 'logo') => ({ key, type: 'image', label, default: '' });
-
-// data: URL de uma imagem enviada (até ~8 MB)
-const IMAGE_DATA_URL = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
-const MAX_IMAGE_LENGTH = 11_000_000;
-
-/**
- * Valida/normaliza os valores segundo o schema. Chaves desconhecidas são descartadas.
- *   text: remove caracteres de controle, apara, corta em maxLength   (vazio → padrão apenas se `allowEmpty` não for true)
- *   color: #rrggbb · font: id conhecido · select: uma das opções · range: número em min..max
- *   toggle: boolean · image: SOMENTE data URL PNG/JPEG/WebP (nunca uma URL externa)
- */
-export function sanitize(fields, input = {}) {
-    return Object.fromEntries(
-        fields.map((field) => {
-            const raw = input[field.key];
-            const type = field.type ?? 'text';
-            let value = field.default;
-            if (type === 'text' && typeof raw === 'string') {
-                const cleaned = raw.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, field.maxLength ?? 200);
-                value = cleaned || (field.allowEmpty ? '' : field.default);
-            } else if (type === 'color' && typeof raw === 'string' && /^#[0-9a-f]{6}$/i.test(raw)) {
-                value = raw.toLowerCase();
-            } else if (type === 'font' && FONT_IDS.has(raw)) {
-                value = raw;
-            } else if (type === 'select' && field.options.some((option) => option.value === raw)) {
-                value = raw;
-            } else if (type === 'range' && raw !== null && raw !== '' && Number.isFinite(Number(raw))) {
-                value = clamp(Number(raw), field.min, field.max);
-            } else if (type === 'toggle' && typeof raw === 'boolean') {
-                value = raw;
-            } else if (type === 'image' && typeof raw === 'string' && raw.length <= MAX_IMAGE_LENGTH && IMAGE_DATA_URL.test(raw)) {
-                value = raw;
-            }
-            return [field.key, value];
-        }),
-    );
-}
+/** Compatível com templates antigos: `logoField('Logo')` = `field.image('logo', 'Logo')`. */
+export const logoField = (label = 'Logo', key = 'logo') => field.image(key, label);
 
 /** <img> para um valor de campo de imagem, ajustado ao contêiner (object-fit: contain). */
 export function logo(parent, src, styles = {}) {
@@ -329,17 +236,19 @@ export const typing = (start, count, step, gain = 0.6) =>
 
 /**
  * template: {
- *   meta?, fields = [], sizes = ['landscape'], fonts = [], duration, thumbAt,
+ *   meta?, fields = [], sizes = ['landscape'], fonts = [], duration, thumbAt, holdAt?,
  *   sounds = [] | (ctx) => [],      // [{ at: segundos, sound: 'whoosh-in', gain: 1 }] na linha do tempo do template
  *   setup(root, ctx) => state,      // constrói o DOM (UMA vez por configuração)
  *   render(t, state, ctx)           // aplica os estilos do instante t (puro!)
  * }
- * ctx: { values, size, W, H }
+ * ctx: { values, size, W, H, layer(key, node) }   (layer registra um nó para a transparência por elemento; ver schema.js)
  *
- * Parâmetros de URL do runner: ?template=<slug>&size=landscape|vertical|square&bg=checker|scene|dark|light|green&play=1
+ * thumbAt = quadro de capa. holdAt = instante em que a entrada terminou e a saída não começou (modo ao vivo congela ali).
+ *
+ * Parâmetros de URL do runner: ?template=<slug>&size=landscape|vertical|square&bg=checker|scene|dark|light|green&mode=driven|loop|live&channel=<id>
  */
 export function defineTemplate(template) {
-    const fields = template.fields ?? [];
+    const fields = normalizeFields(template.fields ?? []);
     const sizes = template.sizes ?? ['landscape'];
     const params = new URLSearchParams(location.search);
     const stage = document.getElementById('stage');
@@ -413,6 +322,8 @@ export function defineTemplate(template) {
             // Animação mais rápida = vídeo mais curto (e vice-versa).
             duration: Math.round((template.duration / speed) * 1000) / 1000,
             thumbAt: (template.thumbAt ?? template.duration / 2) / speed,
+            // Instante em que a entrada terminou e a saída ainda não começou (usado pelo modo ao vivo).
+            holdAt: (template.holdAt ?? template.thumbAt ?? template.duration / 2) / speed,
             sounds: (typeof template.sounds === 'function' ? template.sounds(ctx) : template.sounds ?? [])
                 .filter((cue) => cue.at < template.duration)
                 .map((cue) => ({ sound: cue.sound, gain: cue.gain ?? 1, at: Math.round((cue.at / speed) * 1000) / 1000 })),
@@ -427,33 +338,22 @@ export function defineTemplate(template) {
     };
     window.__configure = configure;
 
-    // Reprodução em tempo real (vitrine). No editor, quem dirige o relógio é o próprio editor.
-    let rafId = 0;
-    window.__play = (on) => {
-        cancelAnimationFrame(rafId);
-        if (!on) {
-            if (window.__template) window.renderFrame(window.__template.thumbAt);
-            return;
-        }
-        const start = performance.now();
-        const loop = (now) => {
-            window.renderFrame(((now - start) / 1000) % window.__template.duration);
-            rafId = requestAnimationFrame(loop);
-        };
-        rafId = requestAnimationFrame(loop);
-    };
+    const api = { renderFrame: window.renderFrame, getInfo: () => window.__template, configure, stage };
+    window.__play = createLoop(api); // usado pela vitrine: __play(true) anima, __play(false) volta ao quadro de capa
 
     window.addEventListener('message', async (event) => {
-        if (event.origin !== location.origin || event.data?.type !== 'bf:fields') return;
+        if (event.origin !== location.origin || event.data?.type !== MSG.FIELDS) return;
         await configure({ fields: event.data.fields ?? ctx?.values, size: event.data.size ?? ctx?.size });
-        if (window.parent !== window) window.parent.postMessage({ type: 'bf:configured' }, location.origin);
+        if (window.parent !== window) window.parent.postMessage({ type: MSG.CONFIGURED }, location.origin);
     });
 
     return (async () => {
         await document.fonts.ready;
         await configure({ fields: decodeFields(params.get('fields')), size: params.get('size') });
-        if (window.parent !== window) window.parent.postMessage({ type: 'bf:ready' }, location.origin);
-        if (params.get('play')) window.__play(true);
+        if (window.parent !== window) window.parent.postMessage({ type: MSG.READY }, location.origin);
+        const mode = params.get('mode') || (params.get('play') ? MODES.LOOP : MODES.DRIVEN);
+        if (mode === MODES.LOOP) window.__play(true);
+        else if (mode === MODES.LIVE) window.__live = startLive({ ...api, channelId: params.get('channel') || 'default' });
         return true;
     })();
 }

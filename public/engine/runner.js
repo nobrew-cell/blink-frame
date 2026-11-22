@@ -8,6 +8,7 @@
  */
 
 import { defineTemplate } from './kit.js';
+import { MSG } from './protocol.js';
 
 const params = new URLSearchParams(location.search);
 document.body.dataset.bg = params.get('bg') || 'none';
@@ -23,6 +24,6 @@ window.__ready = (async () => {
     console.error(error);
     document.body.dataset.bg = 'dark';
     document.getElementById('stage').textContent = `Erro ao carregar o template: ${window.__error}`;
-    if (window.parent !== window) window.parent.postMessage({ type: 'bf:error', message: window.__error }, location.origin);
+    if (window.parent !== window) window.parent.postMessage({ type: MSG.ERROR, message: window.__error }, location.origin);
     throw error;
 });
