@@ -47,6 +47,7 @@ export const FONTS = [
     font('jakarta', 'Plus Jakarta Sans', 'sans', 'plus-jakarta-sans'),
     // Destaque
     font('oswald', 'Oswald', 'display', 'oswald'),
+    font('bangers', 'Bangers (quadrinhos)', 'display', 'bangers', [400], 'Bangers'),
     font('bebas', 'Bebas Neue', 'display', 'bebas-neue', [400]),
     font('anton', 'Anton', 'display', 'anton', [400]),
     font('bungee', 'Bungee', 'display', 'bungee', [400]),

@@ -28,6 +28,7 @@ import { ICON_IDS } from './icons.js';
  */
 export const SECTIONS = [
     { id: 'layout', label: 'Formato e posição', open: true, virtual: true },
+    { id: 'timing', label: 'Tempo e animação', open: true },
     { id: 'content', label: 'Conteúdo', open: true },
     { id: 'media', label: 'Ícone e mídia', open: true },
     { id: 'appearance', label: 'Aparência', open: true },
@@ -110,9 +111,16 @@ export function controls({ accent, text, plate, font, position, scale = true, sp
     if (font) list.push(field.font('font', 'Fonte', font));
     if (position) list.push(field.align('position', 'Posição', position));
     if (scale) list.push(field.range('scale', 'Tamanho', 1, { min: 0.6, max: 1.6, step: 0.05, display: 'multiplier' }));
-    if (speed) list.push(field.range('speed', 'Velocidade da animação', 1, { min: 0.75, max: 1.5, step: 0.05, display: 'multiplier' }));
+    if (speed) list.push(field.range('speed', 'Velocidade da animação', 1, { min: 0.75, max: 1.5, step: 0.05, display: 'multiplier', section: 'timing' }));
     return list;
 }
+
+/**
+ * Tempo em tela (pausa entre a entrada e a saída), em segundos. O motor acrescenta este campo sozinho quando o
+ * template declara `pause: { at, length }` (ver kit.js); use esta função só para mudar rótulo/limites.
+ */
+export const pauseField = ({ length, min = 0.5, max = 30 }) =>
+    field.range('pause', 'Tempo em tela (pausa)', length, { min, max, step: 0.1, display: 'seconds', section: 'timing' });
 
 /** Logo + lado em que ele aparece (esquerda/direita da placa). */
 export const logoControls = ({ side = 'right', label = 'Logo (opcional)' } = {}) => [

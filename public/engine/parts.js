@@ -314,3 +314,81 @@ export function shine(node, { start = 0, end = 1, color = 'rgba(255,255,255,0.35
         beam.style.transform = `translateX(${lerp(-120, 420, p)}%) skewX(-15deg)`;
     };
 }
+
+/* ========================================================================== */
+/* Cursor, trilhas de movimento e rajadas de ícones (templates de "clique")    */
+/* ========================================================================== */
+
+/**
+ * Interpola entre quadros-chave: `track(t, [{ t: 0, x: 0, y: 0 }, { t: 1, x: 100, y: 40, ease: ease.inOutCubic }, …])`.
+ * Antes do primeiro vale o primeiro; depois do último, o último. O `ease` de um quadro-chave vale para o trecho
+ * que CHEGA nele. Valores além de x/y (ex.: `s` de escala) também são interpolados.
+ */
+export function track(t, keys) {
+    if (t <= keys[0].t) return { ...keys[0] };
+    for (let i = 1; i < keys.length; i++) {
+        if (t <= keys[i].t) {
+            const a = keys[i - 1];
+            const b = keys[i];
+            const p = (keys[i].ease ?? ease.inOutCubic)(clamp((t - a.t) / (b.t - a.t)));
+            const out = {};
+            for (const name of Object.keys(b)) if (name !== 't' && name !== 'ease') out[name] = lerp(a[name] ?? b[name], b[name], p);
+            return out;
+        }
+    }
+    return { ...keys[keys.length - 1] };
+}
+
+/**
+ * Ponteiro de mouse (seta). A PONTA da seta fica na origem do nó devolvido: posicione-o com `translate(x, y)`
+ * e a ponta cai exatamente no ponto desejado. `size` = altura em px.
+ */
+export function cursorNode(parent, { size = 54, fill = '#ffffff', stroke = '#0b0b0d' } = {}) {
+    const node = el('div', { position: 'absolute', left: 0, top: 0, width: `${size}px`, height: `${size}px`, pointerEvents: 'none', opacity: 0, filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.45))' }, parent);
+    const root = svgEl('svg', { viewBox: '0 0 24 24', width: size, height: size }, node);
+    svgEl('path', { d: 'M3.2 2.2 L3.2 19.4 L7.6 15.4 L10.7 22 L13.6 20.7 L10.6 14.3 L16.6 14.3 Z', fill, stroke, 'stroke-width': 1.6, 'stroke-linejoin': 'round' }, root);
+    return node;
+}
+
+/**
+ * Rajada de ícones (corações, polegares, sininhos…) que sobem e somem a partir do centro do `parent`
+ * (que precisa ser `position: relative/absolute`). Determinística: posições vêm de `rand(seed)`.
+ * Devolve `(t) => void`. `t` é o tempo do template.
+ */
+export function iconBurst(parent, { name = 'heart', count = 8, color = '#ff4d6d', size = [18, 30], start = 0, duration = 1.1, radius = 90, rise = 70, seed = 11 } = {}) {
+    const random = rand(seed);
+    const origin = el('div', { position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }, parent);
+    const items = Array.from({ length: count }, (_, i) => {
+        const angle = -Math.PI / 2 + ((i + random() * 0.6) / count - 0.5) * Math.PI * 1.3;
+        const px = size[0] + random() * (size[1] - size[0]);
+        const node = svg(name, origin, { position: 'absolute', left: `${-px / 2}px`, top: `${-px / 2}px`, width: `${px}px`, height: `${px}px`, color, opacity: 0 });
+        return { node, angle, reach: radius * (0.55 + random() * 0.45), delay: random() * 0.18, spin: (random() - 0.5) * 50 };
+    });
+    return (t) => {
+        for (const { node, angle, reach, delay, spin } of items) {
+            const p = clamp((t - start - delay) / duration);
+            if (p <= 0 || p >= 1) { node.style.opacity = 0; continue; }
+            const out = ease.outCubic(p);
+            set(node, {
+                opacity: p < 0.15 ? p / 0.15 : 1 - ease.inQuad((p - 0.15) / 0.85),
+                transform: `translate(${Math.cos(angle) * reach * out}px, ${Math.sin(angle) * reach * out - rise * p}px) rotate(${spin * p}deg) scale(${0.6 + 0.5 * ease.outBack(Math.min(1, p * 3))})`,
+            });
+        }
+    };
+}
+
+/**
+ * Posição (x, y em px de LAYOUT, imune a transform) de `node` dentro de `ancestor`. O ancestral precisa ser
+ * posicionado (position: relative/absolute — `backdrop()` já faz isso) e nenhum nó entre os dois pode ser posicionado.
+ */
+export function layoutPos(node, ancestor) {
+    let x = 0;
+    let y = 0;
+    let current = node;
+    while (current && current !== ancestor) {
+        x += current.offsetLeft;
+        y += current.offsetTop;
+        current = current.offsetParent;
+    }
+    return { x, y, w: node.offsetWidth, h: node.offsetHeight, cx: x + node.offsetWidth / 2, cy: y + node.offsetHeight / 2 };
+}

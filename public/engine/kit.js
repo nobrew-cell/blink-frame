@@ -24,14 +24,14 @@
 
 import { FONTS, FONT_BASE } from './fonts.js';
 import { icons } from './icons.js';
-import { normalizeFields, sanitize, field } from './schema.js';
+import { normalizeFields, sanitize, field, pauseField } from './schema.js';
 import { MSG, MODES } from './protocol.js';
 import { createLoop, startLive } from './modes.js';
 
 export { FONTS, icons };
 // Contrato de campos (schema.js) reexportado: os templates importam tudo do kit.
 export {
-    field, controls, logoControls, iconControls, opacityControls, sanitize, normalizeFields,
+    field, controls, logoControls, iconControls, opacityControls, pauseField, sanitize, normalizeFields,
     SECTIONS, SIZE_META, ALIGN_OPTIONS, SIDE_OPTIONS,
 } from './schema.js';
 
@@ -236,7 +236,10 @@ export const typing = (start, count, step, gain = 0.6) =>
 
 /**
  * template: {
- *   meta?, fields = [], sizes = ['landscape'], fonts = [], duration, thumbAt, holdAt?,
+ *   meta?, fields = [], sizes = ['landscape'], fonts = [], duration, thumbAt,
+ *   pause?: { at, length, min?, max? },   // trecho de "pausa": a entrada termina em `at`, a saída começa em `at + length`
+ *                                        // (no tempo do template). O editor ganha o campo "Tempo em tela" (`values.pause`).
+ *   holdAt?,                             // só para templates sem `pause`
  *   sounds = [] | (ctx) => [],      // [{ at: segundos, sound: 'whoosh-in', gain: 1 }] na linha do tempo do template
  *   setup(root, ctx) => state,      // constrói o DOM (UMA vez por configuração)
  *   render(t, state, ctx)           // aplica os estilos do instante t (puro!)
@@ -245,10 +248,16 @@ export const typing = (start, count, step, gain = 0.6) =>
  *
  * thumbAt = quadro de capa. holdAt = instante em que a entrada terminou e a saída não começou (modo ao vivo congela ali).
  *
+ * PAUSA (tempo em tela): o usuário escolhe quantos segundos o conteúdo fica parado entre a entrada e a saída. O motor
+ * reescreve o tempo: antes de `at` t = tempo real; dentro da pausa t avança até `at + length` e FICA ali (animações
+ * de entrada terminam e param); depois da pausa a saída roda normalmente. Para movimentos contínuos DURANTE a
+ * pausa (barras de áudio, brilho pulsante, cursor piscando) use `ctx.time`, um relógio que nunca para.
+ *
  * Parâmetros de URL do runner: ?template=<slug>&size=landscape|vertical|square&bg=checker|scene|dark|light|green&mode=driven|loop|live&channel=<id>
  */
 export function defineTemplate(template) {
-    const fields = normalizeFields(template.fields ?? []);
+    const spec = template.pause ?? null;
+    const fields = normalizeFields([...(template.fields ?? []), ...(spec ? [pauseField(spec)] : [])]);
     const sizes = template.sizes ?? ['landscape'];
     const params = new URLSearchParams(location.search);
     const stage = document.getElementById('stage');
@@ -257,11 +266,33 @@ export function defineTemplate(template) {
     let state;
     let current = template.thumbAt ?? 0; // instante de SAÍDA mostrado (re-renderizado ao reconfigurar)
     let speed = 1;
+    let pauseSeconds = 0; // segundos de SAÍDA em que o conteúdo fica parado (0 = template sem `pause`)
     let calls = 0;
     let layers = []; // [{ node, base, value }] registrados por ctx.layer() no setup
 
-    /** Aplica o instante `t` (timeline do template) e depois escala a opacidade de cada camada registrada. */
-    function draw(t) {
+    /* ---- reescrita do tempo (pausa) ----
+     * toTemplate: segundos de SAÍDA → tempo do template.   toOut: tempo do template → segundos de SAÍDA. */
+    const hasPause = Boolean(spec);
+    const toTemplate = (T) => {
+        if (!hasPause) return T * speed;
+        const a = spec.at / speed;
+        if (T <= a) return T * speed;
+        if (T <= a + pauseSeconds) return spec.at + Math.min((T - a) * speed, spec.length);
+        return spec.at + spec.length + (T - a - pauseSeconds) * speed;
+    };
+    const toOut = (tt) => {
+        if (!hasPause) return tt / speed;
+        const a = spec.at / speed;
+        if (tt <= spec.at) return tt / speed;
+        if (tt <= spec.at + spec.length) return a + Math.min((tt - spec.at) / speed, pauseSeconds);
+        return a + pauseSeconds + (tt - spec.at - spec.length) / speed;
+    };
+    const totalDuration = () => (hasPause ? toOut(template.duration) : template.duration / speed);
+
+    /** Aplica o instante de SAÍDA `T` e depois escala a opacidade de cada camada registrada. */
+    function draw(T) {
+        const t = clamp(toTemplate(T), 0, template.duration);
+        ctx.time = clamp(T * speed, 0, template.duration + (hasPause ? pauseSeconds * speed : 0)); // relógio contínuo (ver PAUSA)
         for (const layer of layers) layer.node.style.opacity = layer.base; // volta ao estado inicial: sem acumular entre quadros
         template.render(t, state, ctx);
         for (const layer of layers) {
@@ -292,6 +323,7 @@ export function defineTemplate(template) {
             },
         };
         speed = typeof values.speed === 'number' ? values.speed : 1;
+        pauseSeconds = hasPause ? (typeof values.pause === 'number' ? values.pause : spec.length) : 0;
 
         stage.replaceChildren();
         set(stage, { width: `${W}px`, height: `${H}px`, position: 'relative', overflow: 'hidden' });
@@ -299,7 +331,7 @@ export function defineTemplate(template) {
             if (values[key]) stage.style.setProperty(name, values[key]);
             else stage.style.removeProperty(name);
         }
-        const fontField = fields.find((field) => field.type === 'font');
+        const fontField = fields.find((field) => field.key === 'font' && field.type === 'font') ?? fields.find((field) => field.type === 'font'); // a fonte principal tem a chave "font"; outras (ex.: authorFont) são secundárias
         stage.style.setProperty('--font', fontField ? fontFamily(values[fontField.key]) : fontFamily('inter'));
         stage.style.fontFamily = 'var(--font)';
 
@@ -309,7 +341,7 @@ export function defineTemplate(template) {
         await Promise.all([...stage.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
         if (call !== calls) return window.__template;
 
-        draw(clamp(current * speed, 0, template.duration));
+        draw(current);
 
         window.__template = {
             meta: template.meta ?? {},
@@ -320,13 +352,14 @@ export function defineTemplate(template) {
             width: W,
             height: H,
             // Animação mais rápida = vídeo mais curto (e vice-versa).
-            duration: Math.round((template.duration / speed) * 1000) / 1000,
-            thumbAt: (template.thumbAt ?? template.duration / 2) / speed,
+            duration: Math.round(totalDuration() * 1000) / 1000,
+            thumbAt: toOut(template.thumbAt ?? (hasPause ? spec.at : template.duration / 2)),
             // Instante em que a entrada terminou e a saída ainda não começou (usado pelo modo ao vivo).
-            holdAt: (template.holdAt ?? template.thumbAt ?? template.duration / 2) / speed,
+            holdAt: hasPause ? toOut(spec.at + spec.length) : toOut(template.holdAt ?? template.thumbAt ?? template.duration / 2),
+            pause: hasPause ? { at: toOut(spec.at), seconds: pauseSeconds } : null,
             sounds: (typeof template.sounds === 'function' ? template.sounds(ctx) : template.sounds ?? [])
                 .filter((cue) => cue.at < template.duration)
-                .map((cue) => ({ sound: cue.sound, gain: cue.gain ?? 1, at: Math.round((cue.at / speed) * 1000) / 1000 })),
+                .map((cue) => ({ sound: cue.sound, gain: cue.gain ?? 1, at: Math.round(toOut(cue.at) * 1000) / 1000 })),
         };
         return window.__template;
     }
@@ -334,7 +367,7 @@ export function defineTemplate(template) {
     /** Renderiza o instante `t` (segundos de SAÍDA). Síncrono e puro em relação a `t`. */
     window.renderFrame = (t) => {
         current = t;
-        if (state) draw(clamp(t * speed, 0, template.duration));
+        if (state) draw(t);
     };
     window.__configure = configure;
 
