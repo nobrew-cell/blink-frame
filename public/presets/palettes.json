@@ -1,0 +1,14 @@
+{
+  "_comment": "Paletas embutidas do BlinkFrame. Para acrescentar: copie um bloco, mude id/name e as cores. Chaves: accent (destaque), textColor (texto), plate (fundo). Evite verdes: o .mp4 usa fundo #00FF00 (chroma key).",
+  "palettes": [
+    { "id": "ambar", "name": "Âmbar", "values": { "accent": "#ffb703", "textColor": "#ffffff", "plate": "#16161a" } },
+    { "id": "podcast", "name": "Laranja podcast", "values": { "accent": "#f59e0b", "textColor": "#ffffff", "plate": "#15161b" } },
+    { "id": "noticia", "name": "Notícia vermelha", "values": { "accent": "#e11d2e", "textColor": "#ffffff", "plate": "#14161c" } },
+    { "id": "oceano", "name": "Oceano", "values": { "accent": "#3b82f6", "textColor": "#ffffff", "plate": "#0f1a2e" } },
+    { "id": "violeta", "name": "Violeta noturno", "values": { "accent": "#8b5cf6", "textColor": "#f5f3ff", "plate": "#15122a" } },
+    { "id": "magenta", "name": "Magenta neon", "values": { "accent": "#ff3d7f", "textColor": "#ffffff", "plate": "#1a0f16" } },
+    { "id": "ouro", "name": "Ouro e preto", "values": { "accent": "#d4af37", "textColor": "#f5f0e1", "plate": "#0b0b0d" } },
+    { "id": "papel", "name": "Papel claro", "values": { "accent": "#c2410c", "textColor": "#1c1e21", "plate": "#f6f5f1" } },
+    { "id": "rosa", "name": "Rosa suave", "values": { "accent": "#ff8fb1", "textColor": "#2b1b22", "plate": "#fff3f6" } }
+  ]
+}

@@ -30,27 +30,27 @@
 <main class="layout">
     <aside class="panel">
         <div class="panel-scroll">
-            <section>
-                <h2>Formato</h2>
-                <div class="segmented" id="sizes" role="group" aria-label="Formato do vídeo"></div>
-            </section>
-            <div id="controls"></div>
+            <div id="panel" class="accordion-list"></div>
             <button class="ghost" id="reset" type="button">Restaurar padrão</button>
         </div>
 
         <section class="export" aria-labelledby="export-title">
             <h2 id="export-title">Exportar</h2>
-            <div class="export-grid">
+            <div class="export-formats">
                 <label class="check"><input type="checkbox" id="fmt-mov" checked> <span><b>.mov</b> com alfa</span></label>
                 <label class="check"><input type="checkbox" id="fmt-mp4" checked> <span><b>.mp4</b> fundo verde</span></label>
-                <label class="field-inline">FPS
-                    <select id="fps"><option>24</option><option>25</option><option selected>30</option><option>50</option><option>60</option></select>
-                </label>
-                <label class="field-inline">Codec do .mov
-                    <select id="mov-codec"><option value="prores">ProRes 4444</option><option value="png">PNG (sem perdas)</option></select>
-                </label>
             </div>
-            <label class="check" id="sounds-row"><input type="checkbox" id="sounds"> <span>Incluir sons do template</span></label>
+            <details class="export-more">
+                <summary>Opções de exportação <span class="chev" aria-hidden="true"></span></summary>
+                <div class="export-grid">
+                    <label class="field-inline">Quadros por segundo
+                        <select id="fps"><option>24</option><option>25</option><option selected>30</option><option>50</option><option>60</option></select>
+                    </label>
+                    <label class="field-inline">Codec do .mov
+                        <select id="mov-codec"><option value="prores">ProRes 4444</option><option value="png">PNG (sem perdas)</option></select>
+                    </label>
+                </div>
+            </details>
             <button class="primary" id="export" type="button">Exportar vídeo</button>
             <div class="job" id="job" hidden>
                 <div class="job-top"><span id="job-msg">Na fila</span><button class="link" id="job-cancel" type="button">Cancelar</button></div>
