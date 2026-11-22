@@ -15,10 +15,11 @@ const INTERACTIVE = [
     '[role="button"]', '[role="tab"]', '[role="switch"]', '[tabindex]:not([tabindex="-1"])', '.card',
 ].join(',');
 
-// Deslocamento máximo da íris em unidades do SVG (viewBox 431 x 425; o logo aparece com ~30-40 px).
+// Deslocamento máximo da íris em unidades do SVG (viewBox 431 x 425). Com o logo a ~38 px, 1 unidade ≈ 0,09 px:
+// valores abaixo de ~50 não se enxergam. A abertura do olho vai de x≈46 a x≈385; as pálpebras cobrem o excesso.
 const LIMITS = {
-    element: { x: 30, y: 16 }, // olhar para um elemento interativo: sutil
-    mouse: { x: 40, y: 20 },   // acompanhar o cursor sobre a própria marca
+    element: { x: 78, y: 30 }, // olhar para um elemento interativo
+    mouse: { x: 90, y: 34 },   // acompanhar o cursor sobre a própria marca
 };
 const IRIS_BLUE = '#284F92';   // cor da íris no arquivo "Procurando o Mouse"
 const BIG_ELEMENT = 240;       // elementos maiores que isso (cards, barra de tempo) são seguidos pelo ponteiro
