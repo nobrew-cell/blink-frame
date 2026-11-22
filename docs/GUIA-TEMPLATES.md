@@ -13,10 +13,10 @@ Para quem for acrescentar coisas (você, ou uma IA trabalhando por você). Leia 
 ```
 templates/meu-modelo/
 ├─ meta.json      { id, name, description, category, tags, order }
-├─ template.js    export default { fields, sizes, duration, thumbAt, holdAt, sounds, setup, render }
+├─ template.js    export default { fields, sizes, duration, thumbAt, pause, sounds, setup, render }
 └─ sounds/        (opcional) .wav só deste modelo
 ```
-Use `templates/entrevista-microfone/` como modelo de referência: ele usa ícone trocável, lado do ícone, posição, transparência por elemento e barras animadas.
+Modelos de referência: `entrevista-microfone` (ícone/lado/posição/transparência), `cartao-inscreva-se` e `like-inscreva-sininho` (cursor clicando, troca de estado do botão), `cartao-citacao` (palavras, logo no rodapé), `tela-final-minimalista` (pausa longa, tela inteira). Use `templates/entrevista-microfone/` como ponto de partida: ele usa ícone trocável, lado do ícone, posição, transparência por elemento e barras animadas.
 
 Ciclo: o runner carrega `template.js` → lê `fields` → o editor monta o painel → cada mudança chama `setup(root, ctx)` de novo (reconstrói o DOM) → `render(t, state, ctx)` pinta cada instante.
 
@@ -38,13 +38,25 @@ Atalhos prontos (use sempre que couber, é isso que padroniza os templates):
 - `logoControls({ side })` → logo opcional.
 - `opacityControls([['plate','Fundo'], ['name','Nome']])` → um slider 0–100% por elemento.
 
-**Chaves padronizadas** (`accent`, `textColor`, `plate`, `font`, `position`, `scale`, `speed`, `icon`, `iconSide`): paletas e estilos salvos só funcionam entre templates que compartilham as mesmas chaves. Reaproveite-as; invente chave nova só para o que é realmente novo.
+**Chaves padronizadas** (`pause`, `accent`, `textColor`, `plate`, `font`, `position`, `scale`, `speed`, `icon`, `iconSide`): paletas e estilos salvos só funcionam entre templates que compartilham as mesmas chaves. Reaproveite-as; invente chave nova só para o que é realmente novo.
+
+## 2b. Tempo em tela (pausa) — vale para TODOS os templates
+Todo template segue **entrada → pausa → saída**. O usuário controla a pausa no acordeão *Tempo e animação* ("Tempo em tela", em segundos) e a *Velocidade* da animação. Para o template participar, declare:
+```js
+pause: { at: 3.0, length: 3.0, min: 1 }   // tempo do template em segundos
+//        at = instante em que a entrada TERMINOU (um cartão, por exemplo, está todo desenhado)
+//        length = duração padrão da pausa (a saída começa em at + length)
+//        min / max = limites do controle (padrão 0,5 e 30 s)
+```
+O motor reescreve o tempo: antes de `at` o `t` corre normal; durante a pausa o `t` avança até `at + length` e **fica parado** (tudo o que é de entrada termina e pára); depois a saída roda. A duração total, os sons e o quadro de capa são recalculados sozinhos. **Movimentos contínuos DURANTE a pausa** (barras de áudio, cursor piscando, anel girando, seta pulando) devem usar `ctx.time` — um relógio que nunca para — em vez de `t`: `render(t, s, ctx)`. Regra: tudo que é "evento" (entrar, clicar, digitar) usa `t`; tudo que é "ambiente" usa `ctx.time`. Escolha `at` depois do último evento de entrada.
 
 ## 3. Escrevendo `setup` e `render`
 - `setup(root, ctx)`: cria o DOM uma vez com `el(tag, styles, parent, text)`. Valores em `ctx.values`; largura útil em `layoutWidth(ctx)`; `anchor(root, ctx)` posiciona conforme formato e posição.
 - Para ícone: `iconNode(parent, values.icon, tamanho, { color })` — já aceita o ícone enviado pelo usuário. Para o lado: `order: values.iconSide === 'right' ? 1 : -1` num flex.
 - Para transparência por elemento: `ctx.layer('plate', node)`; fundo de um contêiner sem apagar o conteúdo: `ctx.layer('plate', backdrop(box, 'var(--plate)'))`.
 - `render(t, state, ctx)`: só estilos calculados com `prog(t, ini, fim, ease.x)` e `inOut(...)`. Entrada na primeira metade, saída na segunda; `holdAt` é o instante em que o modo ao vivo congela até receber "out".
+- **Peças prontas para animações de clique** (`parts.js`): `cursorNode(parent)` desenha a seta do mouse (a ponta fica na origem do nó); `track(t, [{t, x, y, ease}, …])` interpola o caminho; `layoutPos(node, ancestral)` dá a posição de um botão para o cursor mirar; `iconBurst(parent, {name:'heart', start})` solta corações/polegares/sininhos; `pressAt` (veja `like-inscreva-sininho`) faz o botão afundar no clique.
+- Texto que entra palavra por palavra: `words(parent, texto)` e anime a opacidade de cada `<span>` (veja `cartao-citacao`).
 - Sons: `sounds: [{ at: 0.25, sound: 'whoosh', gain: 0.8 }]`. Arquivos `.wav` em `public/sounds/` (globais) ou `templates/<slug>/sounds/`.
 
 ## 4. Passo a passo: novo template
@@ -57,6 +69,7 @@ Atalhos prontos (use sempre que couber, é isso que padroniza os templates):
 ## 5. Paletas, estilos, fontes e ícones
 - **Paletas embutidas:** `public/presets/palettes.json`. Copie um bloco de `palettes`, mude `id`, `name` e as cores (`accent`, `textColor`, `plate`). Aparece em todos os templates que têm essas chaves.
 - **Paletas e estilos do usuário:** botões "Salvar paleta atual" / "Salvar estilo atual" (localStorage `blinkframe:presets:v1`). *Paleta* = cores; *estilo* = cores + fonte + posição + tamanho/velocidade. Exportar/Importar `.json` para backup ou para levar a outro computador. Tipos de preset novos: `PRESET_KINDS` em `public/engine/schema.js`.
+- **Fonte principal:** o campo de fonte com a chave `font` define `--font` (as outras fontes, ex.: `authorFont`, você aplica com `fontFamily(id)`).
 - **Fontes:** `npm i @fontsource/<fonte>`, copie o `.woff2` para `public/fonts/` e acrescente uma linha em `public/engine/fonts.js` (id, nome, categoria, arquivo).
 - **Ícones da biblioteca:** acrescente o desenho (viewBox 24×24, traço/preenchimento `currentColor`) em `public/engine/icons.js` e cite a chave em `choices`.
 - **Ícone do usuário:** nenhum código: o campo `icon` do painel aceita SVG/PNG/JPG/WebP (vira PNG ≤512px no navegador; o servidor só aceita `data:image/png|jpeg|webp`).
