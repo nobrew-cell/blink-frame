@@ -1,0 +1,8 @@
+{
+  "id": "like-inscreva-sininho",
+  "name": "Like, Inscreva-se e Sininho",
+  "description": "Três botões (Like, Inscreva-se, sininho) e um cursor que clica em cada um: Like fica azul, Inscreva-se vira \"Inscrito\" e o sininho toca com aviso amarelo.",
+  "category": "call-to-action",
+  "tags": ["like", "inscreva-se", "sininho", "youtube", "cursor"],
+  "order": 8
+}

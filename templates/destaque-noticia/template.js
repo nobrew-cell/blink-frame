@@ -89,7 +89,7 @@ function setup(root, ctx) {
     };
 }
 
-function render(t, s) {
+function render(t, s, ctx) {
     const p = (a, b, easing = ease.outCubic) => inOut(t, a, b, 6.1 + (a > 0.5 ? 0.15 : 0), 6.7 + (a > 0.5 ? 0.15 : 0), easing, ease.inCubic);
 
     s.tag.style.opacity = p(0, 0.45) > 0 ? 1 : 0;
@@ -99,7 +99,7 @@ function render(t, s) {
     set(s.sub, { clipPath: wipe(s.position, p(SUB_START, 1.6, ease.outExpo)) });
 
     s.subText(t);
-    if (s.pulseDot) s.pulseDot(t);
+    if (s.pulseDot) s.pulseDot(ctx.time); // ctx.time: o ponto continua pulsando durante a pausa
     s.shimmer(t);
 }
 
@@ -109,7 +109,7 @@ export default {
     sizes: ['landscape', 'vertical', 'square'],
     duration: DURATION,
     thumbAt: 3,
-    holdAt: 4.5, // legenda digitada por completo
+    pause: { at: 4.5, length: 1.6, min: 0.5 }, // legenda digitada por completo; saída em 6,1 s (padrão)
     fonts: ['oswald'],
     sounds: (ctx) => [
         { at: 0, sound: 'whoosh-in', gain: 0.45 },

@@ -88,7 +88,7 @@ function setup(root, ctx) {
     return { iconLeft, iconWrap, ring, plate, badge, bars, name, rule, title };
 }
 
-function render(t, s) {
+function render(t, s, ctx) {
     const wipeSide = s.iconLeft ? 'left' : 'right';
     const enter = (a, b, easing = ease.outCubic) => prog(t, a, b, easing);
     const leave = (a, b) => prog(t, a, b, ease.inCubic);
@@ -99,7 +99,7 @@ function render(t, s) {
     const iconScale = Math.max(0, iconIn) * (1 - iconOut);
     set(s.iconWrap, { opacity: Math.min(1, enter(0, 0.25, ease.linear)) * (1 - iconOut), transform: `scale(${iconScale})` });
     if (s.ring) {
-        const breathe = 0.5 + 0.5 * Math.sin((t * 2 * Math.PI) / 2.4);
+        const breathe = 0.5 + 0.5 * Math.sin((ctx.time * 2 * Math.PI) / 2.4);
         set(s.ring, { opacity: enter(0.3, 0.8, ease.linear) * (0.4 + 0.45 * breathe), transform: `scale(${1 + 0.05 * breathe})` });
     }
 
@@ -112,7 +112,7 @@ function render(t, s) {
         set(s.badge, { opacity: p, transform: `translateY(${(1 - p) * 10}px)` });
         s.bars.forEach((bar, i) => {
             const { hz, phase } = BARS[i];
-            const level = 0.5 + 0.5 * Math.sin(t * 2 * Math.PI * hz + phase);
+            const level = 0.5 + 0.5 * Math.sin(ctx.time * 2 * Math.PI * hz + phase);
             bar.style.height = `${5 + 13 * level}px`;
         });
     }
@@ -129,7 +129,7 @@ export default {
     sizes: ['landscape', 'vertical', 'square'],
     duration: DURATION,
     thumbAt: 2.6,
-    holdAt: 3.2,
+    pause: { at: 1.6, length: 3.3, min: 1 }, // parada de 1,6 s a 4,9 s (padrão)
     sounds: [
         { at: 0.05, sound: 'whoosh-in', gain: 0.4 },
         { at: 0.35, sound: 'pop', gain: 0.35 },

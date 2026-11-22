@@ -1,0 +1,8 @@
+{
+  "id": "lower-corporativo",
+  "name": "Lower Corporativo",
+  "description": "Lower limpa e sóbria: barra de destaque, quadro do logo, nome em negrito e cargo em caixa-alta. Placa clara que abre, e fecha deixando só a barra.",
+  "category": "lower-third",
+  "tags": ["corporativo", "nome", "cargo", "logo", "empresa"],
+  "order": 9
+}

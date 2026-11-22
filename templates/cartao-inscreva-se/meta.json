@@ -1,0 +1,8 @@
+{
+  "id": "cartao-inscreva-se",
+  "name": "Cartão de Inscreva-se",
+  "description": "Cartão do canal com foto, nome e @: um cursor clica no botão vermelho \"Inscreva-se\", que vira \"Inscrito\" com uma chuva de corações.",
+  "category": "call-to-action",
+  "tags": ["inscreva-se", "youtube", "canal", "cta", "cursor"],
+  "order": 6
+}

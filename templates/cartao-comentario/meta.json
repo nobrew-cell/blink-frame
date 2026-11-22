@@ -1,0 +1,8 @@
+{
+  "id": "cartao-comentario",
+  "name": "Cartão de Comentário",
+  "description": "Cartão branco com ícone de comentário, chamada \"Comente abaixo\" e uma resposta sendo digitada, com seta pulando para os comentários. Feito para vídeos verticais.",
+  "category": "call-to-action",
+  "tags": ["comentário", "comente", "engajamento", "vertical", "shorts"],
+  "order": 11
+}

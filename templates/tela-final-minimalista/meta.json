@@ -1,0 +1,8 @@
+{
+  "id": "tela-final-minimalista",
+  "name": "Tela Final Minimalista",
+  "description": "Tela final de vídeo: título, duas molduras para os vídeos sugeridos e um círculo de logo com anel animado e chamada para se inscrever. Fundo transparente.",
+  "category": "tela-final",
+  "tags": ["tela final", "end screen", "vídeos sugeridos", "inscreva-se"],
+  "order": 10
+}

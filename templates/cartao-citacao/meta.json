@@ -1,0 +1,8 @@
+{
+  "id": "cartao-citacao",
+  "name": "Cartão de Citação",
+  "description": "Cartão escuro com aspas de destaque, citação revelada palavra por palavra, autor com fio dourado e logo/ícone no canto inferior (à esquerda ou à direita).",
+  "category": "lower-third",
+  "tags": ["citação", "frase", "quote", "autor"],
+  "order": 5
+}

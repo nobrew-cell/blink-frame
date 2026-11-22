@@ -99,6 +99,7 @@ export default {
     sizes: ['landscape', 'vertical', 'square'],
     duration: DURATION,
     thumbAt: 2.6,
+    pause: { at: 1.4, length: 3.6, min: 1 }, // fica parada de 1,4 s a 5,0 s (padrão); o editor deixa mudar
     sounds: [
         { at: 0.05, sound: 'whoosh-in', gain: 0.5 },
         { at: 0.75, sound: 'pop', gain: 0.35 },

@@ -100,6 +100,7 @@ export default {
     sizes: ['landscape', 'vertical', 'square'],
     duration: DURATION,
     thumbAt: 2.2,
+    pause: { at: 1.3, length: 2.6, min: 1 }, // parada de 1,3 s a 3,9 s (padrão)
     sounds: [
         { at: 0.1, sound: 'whoosh-in', gain: 0.3 },
         { at: 3.95, sound: 'whoosh-out', gain: 0.3 },
