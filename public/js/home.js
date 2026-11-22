@@ -24,7 +24,7 @@ async function loadStatus() {
 
 function buildCard(tpl) {
     const href = `/editor.html?template=${encodeURIComponent(tpl.slug)}`;
-    const iframe = el('iframe', { src: `/runner.html?template=${encodeURIComponent(tpl.slug)}&bg=scene`, loading: 'lazy', tabIndex: -1, title: `Prévia de ${tpl.name}` });
+    const iframe = el('iframe', { src: `/runner.html?template=${encodeURIComponent(tpl.slug)}&bg=scene&size=landscape`, loading: 'lazy', tabIndex: -1, title: `Prévia de ${tpl.name}` });
     iframe.setAttribute('aria-hidden', 'true');
     const badge = el('span', { className: 'badge', textContent: '…' });
     const preview = el('a', { className: 'preview', href, ariaLabel: `Abrir ${tpl.name} no editor` }, iframe, badge, el('span', { className: 'hint', textContent: '▶ ao vivo' }));

@@ -84,6 +84,7 @@ function select(f) {
 const FORMATS = {
     percent: (v) => `${Math.round(Number(v) * 100)}%`,
     multiplier: (v) => `${Number(v).toFixed(2).replace('.', ',')}×`,
+    seconds: (v) => `${Number(v).toFixed(1).replace('.', ',')} s`,
     number: (v) => String(v).replace('.', ','),
 };
 
