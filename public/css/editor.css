@@ -5,8 +5,8 @@ body.editor { background: var(--ink); color: #e9eaec; overflow: hidden; display:
 .bar { display: flex; align-items: center; gap: 16px; height: 64px; padding: 0 20px; border-bottom: 1px solid var(--line-dark); flex: none; }
 .bar .back { text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 12px; border-radius: 10px; background: var(--ink-2); border: 1px solid var(--line-dark); }
 .bar .back:hover { background: var(--ink-3); }
-.bar .brand-mark { width: 42px; height: 42px; border-radius: 11px; }
-.bar .brand-mark img, .bar .brand-mark svg { width: 33px; height: 33px; }
+.bar .brand-mark { width: 46px; height: 46px; border-radius: 11px; }
+.bar .brand-mark img, .bar .brand-mark svg { width: 37px; height: 37px; }
 .bar .brand-name { font-size: 19px; color: #fff; }
 .divider { width: 1px; height: 26px; background: var(--line-dark); }
 .bar h1 { margin: 0; font-family: var(--display); font-size: 18px; font-weight: 700; letter-spacing: -0.01em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
