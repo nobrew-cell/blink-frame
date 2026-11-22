@@ -11,6 +11,9 @@ import { createJob, getJob, snapshot, subscribe, enqueue, cancel } from './jobs.
 import { renderJob, FPS_OPTIONS } from './renderer.js';
 import { checkFfmpeg } from './ffmpeg.js';
 
+/** Identifica esta execução do servidor: a intro animada aparece uma vez por execução. */
+const BOOT_ID = `${Date.now().toString(36)}-${process.pid}`;
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = path.join(ROOT, 'public');
 const TEMPLATES = path.join(ROOT, 'templates');
@@ -41,6 +44,7 @@ export async function startServer({ port = 3000, host = '127.0.0.1' } = {}) {
     app.use(express.static(PUBLIC, { setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache') }));
 
     // API
+    app.get('/api/boot', (req, res) => res.json({ id: BOOT_ID }));
     app.get('/api/health', (req, res) => res.json({ ffmpeg: checkFfmpeg(), node: process.version, fps: FPS_OPTIONS }));
     app.get('/api/templates', async (req, res) => res.json(await listTemplates(TEMPLATES)));
 
