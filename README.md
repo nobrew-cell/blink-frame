@@ -30,7 +30,7 @@ Teste ponta a ponta (renderiza os 4 templates e valida alfa, chroma e áudio): `
 
 ## Como usar
 1. Escolha um modelo na vitrine (passe o mouse para ver ao vivo).
-2. No editor o painel é dividido em seções dobráveis (como no Photoshop; o que está aberto fica lembrado): **Formato e posição** (16:9 · YouTube, 9:16, 1:1; esquerda/centro/direita), **Conteúdo**, **Ícone e mídia** (biblioteca ou seu SVG/PNG; lado esquerdo/direito), **Aparência** (cores, fonte com prévia), **Paletas e estilos salvos**, **Transparência**, **Áudio e efeitos** e **Ajustes avançados**. Espaço = play/pause, ←/→ = quadro a quadro (Shift = 10).
+2. No editor o painel é dividido em seções dobráveis (como no Photoshop; o que está aberto fica lembrado): **Formato e posição** (16:9 · YouTube, 9:16, 1:1; esquerda/centro/direita), **Tempo e animação** (velocidade e **Tempo em tela**: quantos segundos o conteúdo fica parado entre a entrada e a saída), **Conteúdo**, **Ícone e mídia** (biblioteca ou seu SVG/PNG; lado esquerdo/direito), **Aparência** (cores, fonte com prévia), **Paletas e estilos salvos**, **Transparência**, **Áudio e efeitos** e **Ajustes avançados**. Espaço = play/pause, ←/→ = quadro a quadro (Shift = 10).
 3. **Paletas e estilos:** salve as cores (ou cores + fonte + posição) e aplique em qualquer outro template; exporte/importe em `.json`.
 4. **Exportar vídeo** → baixe o `.mov` (ProRes 4444 ou PNG com alfa) e/ou o `.mp4` verde (use "Chroma Key"/"Ultra Key" cor #00FF00).
 
@@ -61,7 +61,9 @@ blinkframe/
 │  ├─ entrevista-classica/
 │  ├─ lower-minimalista/
 │  ├─ destaque-noticia/
-│  └─ entrevista-microfone/  # selo superior + ícone trocável/lado
+│  ├─ entrevista-microfone/  # selo superior + ícone trocável/lado
+│  ├─ cartao-citacao/  cartao-inscreva-se/  chamada-shorts/  like-inscreva-sininho/
+│  └─ lower-corporativo/  tela-final-minimalista/  cartao-comentario/
 ├─ docs/GUIA-TEMPLATES.md  # como estender (templates, paletas, fontes, ícones, IA)
 ├─ iniciar-blinkframe.bat  # inicializador Windows (+ scripts/iniciar.ps1)
 ├─ scripts/                # check-env, make-sounds, smoke-test, iniciar.ps1
