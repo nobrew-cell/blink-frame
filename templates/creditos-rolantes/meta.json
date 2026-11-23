@@ -1,0 +1,8 @@
+{
+  "id": "creditos-rolantes",
+  "name": "Créditos Rolantes",
+  "description": "Rolagem contínua como nos filmes: grupos (equipe, elenco, agradecimentos), colunas função | nome, logos de apoiadores, direitos no rodapé e a sua logo no final. Sobe ou desce.",
+  "category": "creditos",
+  "tags": ["créditos", "rolagem", "roll", "filme", "elenco", "patrocinadores", "logo final"],
+  "order": 13
+}

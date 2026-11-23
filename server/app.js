@@ -10,6 +10,7 @@ import { listTemplates, hasTemplate } from './templates.js';
 import { createJob, getJob, snapshot, subscribe, enqueue, cancel } from './jobs.js';
 import { renderJob, FPS_OPTIONS } from './renderer.js';
 import { checkFfmpeg } from './ffmpeg.js';
+import { createThumbs } from './thumbs.js';
 
 /** Identifica esta execução do servidor: a intro animada aparece uma vez por execução. */
 const BOOT_ID = `${Date.now().toString(36)}-${process.pid}`;
@@ -43,7 +44,18 @@ export async function startServer({ port = 3000, host = '127.0.0.1' } = {}) {
     app.use('/fonts', express.static(path.join(PUBLIC, 'fonts'), { maxAge: '7d' }));
     app.use(express.static(PUBLIC, { setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache') }));
 
+    const thumbs = createThumbs({ templatesDir: TEMPLATES, publicDir: PUBLIC, cacheDir: path.join(ROOT, '.cache', 'thumbs'), baseUrl: () => baseUrl });
+    // Miniaturas: o nome do arquivo muda quando o template muda, então o cache do navegador pode ser longo.
+    app.use('/thumbs', express.static(path.join(ROOT, '.cache', 'thumbs'), { maxAge: '30d', immutable: true }));
+
     // API
+    app.get('/api/thumb/:slug', async (req, res) => {
+        try {
+            const thumb = await thumbs.get(req.params.slug);
+            if (!thumb) return res.status(404).json({ error: 'Template inexistente.' });
+            res.json({ url: `/thumbs/${thumb.file}`, duration: thumb.duration });
+        } catch (error) { res.status(500).json({ error: error.message }); }
+    });
     app.get('/api/boot', (req, res) => res.json({ id: BOOT_ID }));
     app.get('/api/health', (req, res) => res.json({ ffmpeg: checkFfmpeg(), node: process.version, fps: FPS_OPTIONS }));
     app.get('/api/templates', async (req, res) => res.json(await listTemplates(TEMPLATES)));

@@ -1,0 +1,8 @@
+{
+  "id": "creditos-cartoes",
+  "name": "Créditos em Cartões",
+  "description": "Os créditos principais, um cartão por vez: página de título, grupos (equipe, elenco…), listas, colunas ou grade, entrando de onde você quiser. Termina com a sua logo.",
+  "category": "creditos",
+  "tags": ["créditos", "equipe", "elenco", "filme", "cartões", "logo final"],
+  "order": 12
+}

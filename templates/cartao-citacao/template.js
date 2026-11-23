@@ -16,7 +16,7 @@ const WORDS_SPAN = 1.5; // todas as palavras entram dentro desta janela, qualque
 const fields = [
     field.text('quote', 'Citação', 'Por que as coisas na vida são tão difíceis?', { maxLength: 220 }),
     field.text('author', 'Autor', 'Wesley Palla', { maxLength: 40, allowEmpty: true }),
-    ...iconControls({ icon: 'hexagon', side: 'right', label: 'Logo / ícone (canto inferior)', choices: ['hexagon', 'star', 'quote', 'mic', 'broadcast', 'tv', 'camera', 'globe', 'bolt', 'heart', 'bell', 'music'] }),
+    ...iconControls({ icon: 'blinkframe', side: 'right', label: 'Logo / ícone (canto inferior)', choices: ['blinkframe', 'star', 'quote', 'quote-close', 'mic', 'broadcast', 'camera', 'globe', 'bolt', 'heart', 'bell', 'music'] }),
     field.toggle('showIcon', 'Mostrar logo / ícone', true, { section: 'media' }),
     field.font('authorFont', 'Fonte do autor', 'inter'),
     ...controls({ accent: '#f5b50a', text: '#ffffff', plate: '#15161b', font: 'playfair', position: 'center' }),

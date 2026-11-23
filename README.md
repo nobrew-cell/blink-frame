@@ -90,3 +90,11 @@ O estado (campos) é independente de como é exibido. `/runner.html?template=<sl
 - **Alfa:** `page.screenshot({ omitBackground: true })` → PNG RGBA → FFmpeg `prores_ks -profile:v 4444 -pix_fmt yuva444p10le` (ou `png` em MOV).
 - **Chroma:** o mesmo fluxo é composto sobre `#00FF00` → `libx264 yuv420p` BT.709. Os templates evitam verde para não serem removidos pelo key.
 - Tudo escuta apenas em `127.0.0.1`; nenhuma chamada externa (fontes e sons são locais).
+
+## Telas de crédito
+- **Créditos em Cartões**: os principais, um cartão por vez (entra de qualquer lado ou de cima/baixo), com logo no final.
+- **Créditos Rolantes**: rolagem contínua com grupos, logos de apoiadores, direitos e logo final. A duração segue o tamanho do texto.
+Detalhes da sintaxe em `docs/GUIA-TEMPLATES.md`.
+
+## Meu espaço
+Página `/perfil.html`: favoritos (coração nos modelos), paletas e estilos salvos, preferências e backup. Pode ser a página inicial (Preferências).

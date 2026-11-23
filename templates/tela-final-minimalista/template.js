@@ -19,7 +19,7 @@ const fields = [
     field.text('labelLeft', 'Legenda da moldura esquerda', 'Último vídeo', { maxLength: 28, allowEmpty: true }),
     field.text('labelRight', 'Legenda da moldura direita', 'Para você', { maxLength: 28, allowEmpty: true }),
     field.text('subscribe', 'Chamada embaixo do círculo', 'Inscreva-se', { maxLength: 24, allowEmpty: true }),
-    field.icon('icon', 'Logo / ícone do canal', 'hexagon', { choices: ['hexagon', 'star', 'bolt', 'globe', 'broadcast', 'mic', 'tv', 'camera', 'heart', 'music', 'quote', 'bell'] }),
+    field.icon('icon', 'Logo / ícone do canal', 'blinkframe', { choices: ['blinkframe', 'star', 'bolt', 'globe', 'broadcast', 'mic', 'tv', 'camera', 'heart', 'music', 'quote', 'bell'] }),
     field.range('dim', 'Escurecer o vídeo ao fundo', 0.3, { min: 0, max: 0.85, step: 0.05, display: 'percent', section: 'appearance' }),
     ...controls({ accent: '#2f4bff', text: '#ffffff', font: 'manrope', scale: false }),
     ...opacityControls([['title', 'Título'], ['left', 'Moldura esquerda'], ['right', 'Moldura direita'], ['circle', 'Círculo do logo'], ['subscribe', 'Chamada Inscreva-se']]),

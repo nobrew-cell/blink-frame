@@ -14,7 +14,7 @@ const DURATION = 5.9;
 const fields = [
     field.text('name', 'Texto principal (nome)', 'Jane Cooper', { maxLength: 40 }),
     field.text('role', 'Subtítulo (cargo)', 'Head de Marketing', { maxLength: 50, allowEmpty: true }),
-    ...iconControls({ icon: 'hexagon', side: 'left', label: 'Logo / ícone da empresa', choices: ['hexagon', 'star', 'bolt', 'globe', 'broadcast', 'mic', 'tv', 'camera', 'heart', 'music', 'quote', 'at'] }),
+    ...iconControls({ icon: 'blinkframe', side: 'left', label: 'Logo / ícone da empresa', choices: ['blinkframe', 'star', 'bolt', 'globe', 'broadcast', 'mic', 'tv', 'camera', 'heart', 'music', 'quote', 'at'] }),
     field.toggle('showIcon', 'Mostrar quadro do logo', true, { section: 'media' }),
     ...controls({ accent: '#2563eb', text: '#0b1020', plate: '#ffffff', font: 'montserrat', position: 'left' }),
     ...opacityControls([['bar', 'Barra de destaque'], ['plate', 'Fundo da placa'], ['icon', 'Logo / ícone'], ['name', 'Nome'], ['role', 'Cargo']]),

@@ -89,3 +89,23 @@ Já existe a separação necessária:
 
 ## 8. Instruções curtas para uma IA
 > Leia `docs/GUIA-TEMPLATES.md` e `templates/entrevista-microfone/`. Crie o template pedido em `templates/<slug>/` reaproveitando `controls`, `iconControls` e `opacityControls`; mantenha as chaves padronizadas; `render` só pode depender de `t`. Não altere `public/js/editor/` para um template específico. Ao final rode `npm run test:render` e abra o editor nos três formatos.
+
+## Créditos (Créditos em Cartões e Créditos Rolantes)
+
+Os dois templates usam o mesmo módulo (`public/engine/credits.js`) e o mesmo campo `credits`.
+
+### Como o usuário edita
+No editor, a seção **Conteúdo** mostra os créditos por **grupos**: cada grupo tem título, subtítulo opcional, linhas *função / nome* e uma observação pequena. Botões de **+** e **−** adicionam ou removem linhas e grupos; as setas movem o grupo. **Enter** no nome cria outra linha; **Shift+Enter** repete a função (vários nomes na mesma função). "Carregar um modelo" preenche tudo com um exemplo.
+
+### Para quem cria templates
+- `field.credits(key, label, textoPadrão, { examples })` cria o editor visual. O valor é `[{ title, sub, rows:[{role,name}], note }]` (`engine/credits-data.js`).
+- O motor de layout ainda lê o texto interno (`# GRUPO | sub`, `Função | Nome`, `| outro nome`, `~ nota`, linha em branco = página). Converta com `groupsToText(values.credits)` antes de `parseCredits()`. `textToGroups()` faz o inverso (modelos prontos e projetos antigos).
+- `duration`, `thumbAt` e `holdAt` podem ser **funções** `(state, ctx) => segundos`; `sounds` pode ser função `(ctx, state)`.
+- `field.paragraph(...)` (texto de várias linhas) e `field.images(...)` (lista de imagens) também existem.
+- `creditBlock()` e `endCard()` desenham um grupo e a logo final; novos modelos entram em `EXAMPLES_CARDS` / `EXAMPLES_ROLL` (em texto).
+
+## Meu espaço, favoritos e vitrine
+- `/perfil.html` ("Meu espaço"): favoritos, paletas e estilos salvos (excluir, importar/exportar), preferências (página inicial, prévias ao vivo) e backup completo. Tudo em localStorage (`js/shared/store.js`).
+- O coração aparece nos cartões da vitrine e no editor. A vitrine tem busca, filtro por categoria e "Favoritos".
+- Cartões leves (`js/cards.js`): o iframe só é criado quando o cartão aparece, em fila de 2, e é destruído quando sai da tela. A animação só toca com o mouse em cima e dá para desligar em Preferências.
+- Ícones das seções do editor: `SECTION_ICONS` em `js/editor/panel.js`.
