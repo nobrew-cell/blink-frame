@@ -44,3 +44,30 @@ body.home { background: var(--paper); color: var(--ink); }
 footer { border-top: 1px solid var(--line-light); padding: 22px 0 40px; font-size: 13.5px; color: rgba(28, 30, 33, 0.65); }
 
 @media (max-width: 860px) { .hero { padding-top: 28px; } }
+
+/* Navegação, busca e filtros */
+.top { gap: 20px; }
+.nav { display: flex; gap: 4px; margin-right: auto; margin-left: 28px; }
+.nav a { text-decoration: none; color: var(--ink); font-weight: 600; font-size: 14.5px; padding: 8px 14px; border-radius: 999px; }
+.nav a:hover { background: var(--paper-2); }
+.nav a[aria-current="page"] { background: var(--ink); color: var(--paper); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 22px; }
+.toolbar input[type="search"] { flex: 1 1 240px; max-width: 360px; padding: 11px 16px; border-radius: 999px; border: 1px solid var(--line-light); background: var(--paper-2); font: inherit; font-size: 14.5px; color: var(--ink); }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chips button { font: inherit; font-size: 13.5px; font-weight: 600; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-light); background: var(--paper-2); color: var(--ink); cursor: pointer; }
+.chips button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* Coração e placeholder dos cartões */
+.card { position: relative; }
+.fav-btn { position: absolute; top: 10px; right: 10px; z-index: 3; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; border: 0; cursor: pointer; background: rgba(255, 255, 255, 0.92); color: #333; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); transition: transform .15s; }
+.fav-btn:hover { transform: scale(1.1); }
+.fav-btn[aria-pressed="true"] { color: #e11d48; }
+.preview .badge { right: 54px; }
+
+/* Miniatura + prévia ao passar o mouse */
+.preview > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.preview.loading { background: linear-gradient(110deg, #262a33 30%, #343945 50%, #262a33 70%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+.preview.failed { background: linear-gradient(135deg, #2a2e38, #181a20); }
+.preview iframe { opacity: 1; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .preview.loading { animation: none; } }

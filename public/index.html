@@ -16,6 +16,10 @@
             <span class="brand-mark"><img id="brand-logo" src="/brand/logo-normal.svg" alt=""></span>
             <span class="brand-name">BlinkFrame</span>
         </a>
+        <nav class="nav" aria-label="Principal">
+            <a href="/?vitrine" aria-current="page">Vitrine</a>
+            <a href="/perfil.html">Meu espaço</a>
+        </nav>
         <span class="status" id="status" data-state="unknown"><i></i><span>Verificando o FFmpeg…</span></span>
     </header>
 
@@ -38,6 +42,10 @@
         <div class="section-head">
             <h2 id="modelos">Modelos</h2>
             <span id="count"></span>
+        </div>
+        <div class="toolbar">
+            <input type="search" id="search" placeholder="Buscar modelo (nome, tag…)" aria-label="Buscar modelo" autocomplete="off">
+            <div class="chips" id="filters" role="group" aria-label="Filtrar"></div>
         </div>
         <div class="grid" id="grid" aria-live="polite"></div>
     </section>

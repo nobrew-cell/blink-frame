@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meu espaço — BlinkFrame</title>
+<link rel="icon" type="image/svg+xml" href="/brand/favicon.svg">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/perfil.css">
+</head>
+<body class="home">
+<div class="wrap">
+    <header class="top">
+        <a class="brand" href="/?vitrine" aria-label="BlinkFrame — vitrine">
+            <span class="brand-mark"><img id="brand-logo" src="/brand/logo-normal.svg" alt=""></span>
+            <span class="brand-name">BlinkFrame</span>
+        </a>
+        <nav class="nav" aria-label="Principal">
+            <a href="/?vitrine">Vitrine</a>
+            <a href="/perfil.html" aria-current="page">Meu espaço</a>
+        </nav>
+    </header>
+
+    <section class="me-head">
+        <h1 id="me-title">Meu espaço</h1>
+        <p>Seus favoritos, paletas, estilos e preferências ficam guardados neste computador.</p>
+    </section>
+
+    <div class="me-layout">
+        <nav class="me-tabs" role="tablist" aria-label="Seções" id="tabs"></nav>
+        <main class="me-panel" id="panel"></main>
+    </div>
+</div>
+<script src="/js/brand.js" type="module"></script>
+<script src="/js/perfil.js" type="module"></script>
+</body>
+</html>

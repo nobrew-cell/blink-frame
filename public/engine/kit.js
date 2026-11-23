@@ -264,7 +264,11 @@ export function defineTemplate(template) {
 
     let ctx;
     let state;
-    let current = template.thumbAt ?? 0; // instante de SAÍDA mostrado (re-renderizado ao reconfigurar)
+    let current = typeof template.thumbAt === 'number' ? template.thumbAt : 0; // instante de SAÍDA mostrado (re-renderizado ao reconfigurar)
+    let duration = typeof template.duration === 'number' ? template.duration : 0; // pode ser função (créditos: depende do conteúdo)
+    let firstShown = false;
+    /** duration, thumbAt e holdAt podem ser números OU funções (state, ctx) => número, para conteúdo de tamanho variável. */
+    const resolve = (value) => (typeof value === 'function' ? value(state, ctx) : value);
     let speed = 1;
     let pauseSeconds = 0; // segundos de SAÍDA em que o conteúdo fica parado (0 = template sem `pause`)
     let calls = 0;
@@ -287,12 +291,12 @@ export function defineTemplate(template) {
         if (tt <= spec.at + spec.length) return a + Math.min((tt - spec.at) / speed, pauseSeconds);
         return a + pauseSeconds + (tt - spec.at - spec.length) / speed;
     };
-    const totalDuration = () => (hasPause ? toOut(template.duration) : template.duration / speed);
+    const totalDuration = () => (hasPause ? toOut(duration) : duration / speed);
 
     /** Aplica o instante de SAÍDA `T` e depois escala a opacidade de cada camada registrada. */
     function draw(T) {
-        const t = clamp(toTemplate(T), 0, template.duration);
-        ctx.time = clamp(T * speed, 0, template.duration + (hasPause ? pauseSeconds * speed : 0)); // relógio contínuo (ver PAUSA)
+        const t = clamp(toTemplate(T), 0, duration);
+        ctx.time = clamp(T * speed, 0, duration + (hasPause ? pauseSeconds * speed : 0)); // relógio contínuo (ver PAUSA)
         for (const layer of layers) layer.node.style.opacity = layer.base; // volta ao estado inicial: sem acumular entre quadros
         template.render(t, state, ctx);
         for (const layer of layers) {
@@ -336,6 +340,9 @@ export function defineTemplate(template) {
         stage.style.fontFamily = 'var(--font)';
 
         state = template.setup(stage, ctx) || {};
+        duration = resolve(template.duration);
+        if (!firstShown && typeof template.thumbAt === 'function') current = resolve(template.thumbAt);
+        firstShown = true;
 
         // Imagens (logos) são desenhadas em todos os quadros: precisam estar decodificadas.
         await Promise.all([...stage.querySelectorAll('img')].map((img) => img.decode().catch(() => {})));
@@ -353,12 +360,12 @@ export function defineTemplate(template) {
             height: H,
             // Animação mais rápida = vídeo mais curto (e vice-versa).
             duration: Math.round(totalDuration() * 1000) / 1000,
-            thumbAt: toOut(template.thumbAt ?? (hasPause ? spec.at : template.duration / 2)),
+            thumbAt: toOut(resolve(template.thumbAt) ?? (hasPause ? spec.at : duration / 2)),
             // Instante em que a entrada terminou e a saída ainda não começou (usado pelo modo ao vivo).
-            holdAt: hasPause ? toOut(spec.at + spec.length) : toOut(template.holdAt ?? template.thumbAt ?? template.duration / 2),
+            holdAt: hasPause ? toOut(spec.at + spec.length) : toOut(resolve(template.holdAt) ?? resolve(template.thumbAt) ?? duration / 2),
             pause: hasPause ? { at: toOut(spec.at), seconds: pauseSeconds } : null,
-            sounds: (typeof template.sounds === 'function' ? template.sounds(ctx) : template.sounds ?? [])
-                .filter((cue) => cue.at < template.duration)
+            sounds: (typeof template.sounds === 'function' ? template.sounds(ctx, state) : template.sounds ?? [])
+                .filter((cue) => cue.at < duration)
                 .map((cue) => ({ sound: cue.sound, gain: cue.gain ?? 1, at: Math.round(toOut(cue.at) * 1000) / 1000 })),
         };
         return window.__template;

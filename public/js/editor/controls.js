@@ -6,14 +6,39 @@
 import { el, svgIcon } from './dom.js';
 import { state, setValue } from './state.js';
 import { createFontPicker } from './font-picker.js';
-import { imageControl, iconControl } from './media-controls.js';
+import { creditsControl } from './credits-control.js';
+import { imageControl, iconControl, imagesControl } from './media-controls.js';
 
 const idOf = (f) => `f-${f.key}`;
 const hint = (f) => (f.hint ? el('p', { className: 'hint', textContent: f.hint }) : null);
 const head = (f, extra) => el('div', { className: 'field-head' }, el('label', { htmlFor: idOf(f), textContent: f.label }), extra ?? null);
 
 /* ---------- texto ---------- */
+function paragraph(f) {
+    const max = f.maxLength ?? 6000;
+    const value = state.values[f.key] ?? '';
+    const area = el('textarea', { id: idOf(f), value, rows: f.rows ?? 12, maxLength: max, spellcheck: false, className: 'paragraph' });
+    const lines = (text) => (text.trim() ? text.split('\n').length : 0);
+    const count = el('span', { className: 'count', textContent: `${lines(value)} linhas` });
+    area.addEventListener('input', () => { count.textContent = `${lines(area.value)} linhas`; setValue(f.key, area.value); });
+    const examples = (f.examples ?? []).length
+        ? el('div', { className: 'examples' }, el('span', { className: 'label', textContent: 'Carregar um modelo' }),
+            el('div', { className: 'preset-list' }, ...f.examples.map((example) => {
+                const button = el('button', { type: 'button', className: 'btn-soft', textContent: example.label });
+                button.addEventListener('click', () => {
+                    if (area.value.trim() && area.value.trim() !== example.value.trim() && !confirm('Substituir o texto atual por este modelo?')) return;
+                    area.value = example.value;
+                    count.textContent = `${lines(example.value)} linhas`;
+                    setValue(f.key, example.value);
+                });
+                return button;
+            })))
+        : null;
+    return el('div', { className: 'field' }, head(f, count), area, hint(f), examples);
+}
+
 function text(f) {
+    if (f.multiline) return paragraph(f);
     const max = f.maxLength ?? 200;
     const value = state.values[f.key] ?? '';
     const input = el('input', { type: 'text', id: idOf(f), value, maxLength: max, autocomplete: 'off', spellcheck: false });
@@ -110,7 +135,7 @@ const toggle = (f) => switchRow({
     id: idOf(f), label: f.label, hintText: f.hint, checked: Boolean(state.values[f.key]), onChange: (v) => setValue(f.key, v),
 });
 
-const RENDERERS = { text, color, font, align, select, range, toggle, image: imageControl, icon: iconControl };
+const RENDERERS = { text, color, font, align, select, range, toggle, image: imageControl, images: imagesControl, icon: iconControl, credits: creditsControl };
 
 /** Controle de um campo do schema (ou null se o tipo não for conhecido). */
 export const renderField = (f) => RENDERERS[f.type]?.(f) ?? null;

@@ -105,3 +105,26 @@ export function iconControl(f) {
     return el('div', { className: 'field' }, el('span', { className: 'label', textContent: f.label }), holder, grid, errorSlot,
         el('p', { className: 'hint', textContent: 'Arquivos enviados (SVG, PNG, JPG, WebP) mantêm as próprias cores.' }));
 }
+
+/** Várias imagens (ex.: logos de patrocinadores): miniaturas com × e botão para acrescentar, até `f.max`. */
+export function imagesControl(f) {
+    const max = f.max ?? 8;
+    const holder = el('div', { className: 'images-grid' });
+    const errorSlot = el('div');
+    const paint = () => {
+        const list = Array.isArray(state.values[f.key]) ? state.values[f.key] : [];
+        const up = uploader(list.length ? 'Adicionar outra…' : 'Escolher imagens…', (data) => { setValue(f.key, [...list, data].slice(0, max)); paint(); });
+        const cells = list.map((src, index) => {
+            const remove = el('button', { type: 'button', className: 'image-remove', title: 'Remover', textContent: '×' });
+            remove.setAttribute('aria-label', `Remover imagem ${index + 1}`);
+            remove.addEventListener('click', () => { setValue(f.key, list.filter((_, i) => i !== index)); paint(); });
+            return el('div', { className: 'image-cell' }, el('img', { src, alt: '' }), remove);
+        });
+        const actions = el('div', { className: 'media-actions' }, list.length < max ? up.button : el('span', { className: 'hint', textContent: `Máximo de ${max} imagens` }),
+            list.length ? Object.assign(el('button', { type: 'button', className: 'btn-link', textContent: 'Remover todas' }), { onclick: () => { setValue(f.key, []); paint(); } }) : null);
+        holder.replaceChildren(...cells, actions, up.input);
+        errorSlot.replaceChildren(up.error);
+    };
+    paint();
+    return el('div', { className: 'field' }, el('span', { className: 'label', textContent: f.label }), holder, errorSlot);
+}

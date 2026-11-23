@@ -16,6 +16,7 @@
 
 import { FONTS } from './fonts.js';
 import { ICON_IDS } from './icons.js';
+import { textToGroups, cleanGroups } from './credits-data.js';
 
 /* ========================================================================== */
 /* Seções do painel                                                            */
@@ -38,10 +39,10 @@ export const SECTIONS = [
     { id: 'advanced', label: 'Ajustes avançados', open: false },
 ];
 
-export const FIELD_TYPES = ['text', 'color', 'font', 'align', 'select', 'range', 'toggle', 'image', 'icon'];
+export const FIELD_TYPES = ['text', 'color', 'font', 'align', 'select', 'range', 'toggle', 'image', 'images', 'icon', 'credits'];
 
 const DEFAULT_SECTION = {
-    text: 'content', image: 'media', icon: 'media',
+    text: 'content', credits: 'content', image: 'media', images: 'media', icon: 'media',
     color: 'appearance', font: 'appearance',
     align: 'layout', select: 'layout',
     range: 'advanced', toggle: 'advanced',
@@ -76,6 +77,11 @@ export const SIZE_META = {
 const make = (type, key, label, def, extra = {}) => ({ key, type, label, default: def, ...extra });
 
 export const field = {
+    /**
+     * Texto de VÁRIAS linhas (caixa grande): `field.paragraph(key, label, default, { rows, maxLength, examples })`.
+     * Mantém as quebras de linha (créditos, listas). `examples: [{ label, value }]` cria botões "Carregar exemplo".
+     */
+    paragraph: (key, label, def, extra = {}) => make('text', key, label, def, { maxLength: 6000, multiline: true, rows: 12, ...extra }),
     /** Texto. `maxLength` padrão 60; `allowEmpty: true` permite apagar o campo (ex.: empresa opcional). */
     text: (key, label, def, extra = {}) => make('text', key, label, def, { maxLength: 60, ...extra }),
     /** Cor "#rrggbb". */
@@ -92,6 +98,13 @@ export const field = {
     range: (key, label, def, { min = 0, max = 1, step = 0.05, display = 'number', ...extra } = {}) =>
         make('range', key, label, def, { min, max, step, display, ...extra }),
     toggle: (key, label, def, extra) => make('toggle', key, label, def, extra),
+    /** Várias imagens enviadas pelo usuário (ex.: logos de patrocinadores). Valor: lista de data URLs. `max` padrão 8. */
+    images: (key, label, extra = {}) => make('images', key, label, [], { max: 8, ...extra }),
+    /**
+     * Lista de créditos editada por grupos (título + linhas função/nome). Valor: [{ title, sub, rows:[{role,name}], note }].
+     * `def` pode ser o texto do motor (`# GRUPO` / `Função | Nome`); `examples: [{ label, value(texto) }]` cria "Carregar um modelo".
+     */
+    credits: (key, label, def, extra = {}) => make('credits', key, label, textToGroups(def), { section: 'content', ...extra }),
     /** Imagem enviada pelo usuário (logo). Vazio = sem imagem. */
     image: (key, label, extra) => make('image', key, label, '', extra),
     /** Ícone: id da biblioteca (icons.js) OU imagem enviada. `choices` = ids oferecidos no seletor. */
@@ -171,6 +184,7 @@ const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
  *   text    remove caracteres de controle, apara, corta em maxLength (vazio → padrão, salvo `allowEmpty`)
  *   color   #rrggbb          font   id conhecido         align/select   uma das opções
  *   range   número em min..max                            toggle         boolean
+ *   images  lista (até `max`) de data URLs PNG/JPEG/WebP; as inválidas são descartadas
  *   image   SOMENTE data URL PNG/JPEG/WebP                icon           id da biblioteca OU data URL de imagem
  */
 export function sanitize(fields, input = {}) {
@@ -180,7 +194,10 @@ export function sanitize(fields, input = {}) {
         switch (f.type) {
             case 'text':
                 if (typeof raw === 'string') {
-                    const cleaned = raw.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, f.maxLength ?? 200);
+                    // Várias linhas: preserva \n (CRLF vira \n, tab vira espaço); uma linha: remove todo caractere de controle
+                    const source = f.multiline ? raw.replace(/\r\n?/g, '\n').replace(/\t/g, '  ') : raw;
+                    const strip = f.multiline ? /[\u0000-\u0009\u000b-\u001f\u007f]/g : /[\u0000-\u001f\u007f]/g;
+                    const cleaned = source.replace(strip, '').trim().slice(0, f.maxLength ?? 200);
                     value = cleaned || (f.allowEmpty ? '' : f.default);
                 }
                 break;
@@ -191,6 +208,8 @@ export function sanitize(fields, input = {}) {
             case 'range': if (raw !== null && raw !== '' && Number.isFinite(Number(raw))) value = clamp(Number(raw), f.min, f.max); break;
             case 'toggle': if (typeof raw === 'boolean') value = raw; break;
             case 'image': if (validImage(raw)) value = raw; break;
+            case 'images': if (Array.isArray(raw)) value = raw.filter(validImage).slice(0, f.max ?? 8); break;
+            case 'credits': { const groups = cleanGroups(raw); if (groups) value = groups; break; }
             case 'icon': if (ICON_IDS.includes(raw) || validImage(raw)) value = raw; break;
             default: break;
         }

@@ -11,6 +11,7 @@
  * Fluxo: runner.html carrega o template → READY → o editor lê o schema (`window.__template.fields`), monta o painel
  * e passa a empurrar cada mudança de valor para o runner (debounce), que reconfigura e responde CONFIGURED.
  */
+import { favoriteButton } from './shared/store.js';
 import { MSG } from '/engine/protocol.js';
 import { $, debounce, storage } from './editor/dom.js';
 import { state, on, emit, setValues } from './editor/state.js';
@@ -110,6 +111,7 @@ async function init() {
     const meta = templates.find((t) => t.slug === state.slug);
     if (!meta) { $('tpl-name').textContent = 'Template não encontrado'; showStageError(`"${state.slug}" não existe em /templates.`); return; }
     $('tpl-name').textContent = meta.name;
+    $('fav-slot').replaceChildren(favoriteButton(state.slug, meta.name));
     document.title = `${meta.name} — BlinkFrame`;
     frame.addEventListener('load', applyBackground);
     frame.src = `/runner.html?template=${encodeURIComponent(state.slug)}&bg=${state.bg}`;
